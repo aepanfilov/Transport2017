@@ -136,6 +136,7 @@
       <DependentUpon>WaitForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
+    <None Include="Данные.zip" />
     <None Include="инструкция.docx" />
   </ItemGroup>
   <ItemGroup>
