@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using Транспорт2017.ГенераторПас;
 
 namespace Транспорт2017
 {
@@ -1043,6 +1044,11 @@ namespace Транспорт2017
                 return false;
             }
             return true;
+        }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            Calculate.LoadStopFromExcel();
         }
     }
 }

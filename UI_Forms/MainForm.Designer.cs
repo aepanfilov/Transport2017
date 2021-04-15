@@ -47,6 +47,7 @@
             this.structMarsh_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.TabPage5.SuspendLayout();
             this.TabControl1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -59,7 +60,7 @@
             this.TabPage5.Location = new System.Drawing.Point(4, 24);
             this.TabPage5.Name = "TabPage5";
             this.TabPage5.Padding = new System.Windows.Forms.Padding(3);
-            this.TabPage5.Size = new System.Drawing.Size(656, 379);
+            this.TabPage5.Size = new System.Drawing.Size(815, 379);
             this.TabPage5.TabIndex = 4;
             this.TabPage5.Text = "Общие результаты";
             this.TabPage5.UseVisualStyleBackColor = true;
@@ -70,7 +71,7 @@
             this.openRes_button.AutoSize = true;
             this.openRes_button.BackColor = System.Drawing.Color.PaleGreen;
             this.openRes_button.Image = global::Транспорт2017.Properties.Resources.excel;
-            this.openRes_button.Location = new System.Drawing.Point(480, 22);
+            this.openRes_button.Location = new System.Drawing.Point(639, 22);
             this.openRes_button.Name = "openRes_button";
             this.openRes_button.Size = new System.Drawing.Size(150, 63);
             this.openRes_button.TabIndex = 7;
@@ -89,7 +90,7 @@
             this.listBox1.ItemHeight = 15;
             this.listBox1.Location = new System.Drawing.Point(6, 6);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(450, 364);
+            this.listBox1.Size = new System.Drawing.Size(609, 364);
             this.listBox1.TabIndex = 0;
             // 
             // TabControl1
@@ -99,7 +100,7 @@
             this.TabControl1.Location = new System.Drawing.Point(0, 54);
             this.TabControl1.Name = "TabControl1";
             this.TabControl1.SelectedIndex = 0;
-            this.TabControl1.Size = new System.Drawing.Size(664, 407);
+            this.TabControl1.Size = new System.Drawing.Size(823, 407);
             this.TabControl1.TabIndex = 2;
             // 
             // toolStrip1
@@ -115,10 +116,11 @@
             this.toolStripSeparator3,
             this.toolStripSplitButton1,
             this.toolStripSeparator2,
-            this.toolStripButton1});
+            this.toolStripButton1,
+            this.toolStripButton2});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(664, 54);
+            this.toolStrip1.Size = new System.Drawing.Size(823, 54);
             this.toolStrip1.TabIndex = 6;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -165,7 +167,7 @@
             this.report_toolStripButton.Image = global::Транспорт2017.Properties.Resources.paper_text_pencil;
             this.report_toolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.report_toolStripButton.Name = "report_toolStripButton";
-            this.report_toolStripButton.Size = new System.Drawing.Size(81, 51);
+            this.report_toolStripButton.Size = new System.Drawing.Size(82, 51);
             this.report_toolStripButton.Text = "Отчет в Excel";
             this.report_toolStripButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.report_toolStripButton.Click += new System.EventHandler(this.Report_toolStripButton_Click);
@@ -235,16 +237,26 @@
             this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
             this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(103, 51);
+            this.toolStripButton1.Size = new System.Drawing.Size(102, 51);
             this.toolStripButton1.Text = "Тест троллейбус";
             this.toolStripButton1.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.toolStripButton1.Click += new System.EventHandler(this.ToolStripButton1_Click_1);
+            // 
+            // toolStripButton2
+            // 
+            this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
+            this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton2.Name = "toolStripButton2";
+            this.toolStripButton2.Size = new System.Drawing.Size(36, 51);
+            this.toolStripButton2.Text = "toolStripButton2";
+            this.toolStripButton2.Click += new System.EventHandler(this.toolStripButton2_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(664, 461);
+            this.ClientSize = new System.Drawing.Size(823, 461);
             this.Controls.Add(this.TabControl1);
             this.Controls.Add(this.toolStrip1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -281,5 +293,6 @@
         private System.Windows.Forms.ToolStripMenuItem structMarsh_ToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripButton toolStripButton1;
+        private System.Windows.Forms.ToolStripButton toolStripButton2;
     }
 }
