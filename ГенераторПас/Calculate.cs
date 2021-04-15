@@ -51,63 +51,15 @@ namespace Транспорт2017.ГенераторПас
                 double[,] evenPens = new double[N, N]; // матрица доли пенсионеров и школьников вечером
                 double[,] timeDist = new double[N, M]; // матрица доли пассажиров, отъезжающих от остановки, в зависимости от времени прибытия
 
-                for (int i = 160; i < N + 160; i++)
+                for (int i = 0; i < N; i++)
                 {
-                    for (int j = 3; j < N + 3; j++)
+                    for (int j = 0; j < N; j++)
                     {
-                        mornWork[x, y] = population.Cells[i, j].GetValue<double>();
-                        y++;
-                    }
-                    y = 0;
-                    x++;
-                }
-
-                x = 0;
-
-                for (int i = 173; i < N + 173; i++)
-                {
-                    for (int j = 3; j < N + 3; j++)
-                    {
-                        mornPens[x, y] = population.Cells[i, j].GetValue<double>();
-                        y++;
-                    }
-                    y = 0;
-                    x++;
-                }
-
-                x = 0;
-
-                for (int i = 194; i < N + 194; i++)
-                {
-                    for (int j = 3; j < N + 3; j++)
-                    {
-                        dayTime[x, y] = population.Cells[i, j].GetValue<double>();
-                        y++;
-                    }
-                    y = 0;
-                    x++;
-                }
-
-                x = 0;
-
-                for (int i = 207; i < N + 207; i++)
-                {
-                    for (int j = 3; j < N + 3; j++)
-                    {
-                        evenWork[x, y] = population.Cells[i, j].GetValue<double>();
-                        y++;
-                    }
-                    y = 0;
-                    x++;
-                }
-
-                x = 0;
-
-                for (int i = 207; i < N + 207; i++)
-                {
-                    for (int j = 15; j < N + 15; j++)
-                    {
-                        evenPens[x, y] = population.Cells[i, j].GetValue<double>();
+                        mornWork[x, y] = population.Cells[i + 160, j + 3].GetValue<double>();
+                        mornPens[x, y] = population.Cells[i + 173, j + 3].GetValue<double>();
+                        dayTime[x, y] = population.Cells[i + 194, j + 3].GetValue<double>();
+                        evenWork[x, y] = population.Cells[i + 207, j + 3].GetValue<double>();
+                        evenPens[x, y] = population.Cells[i + 207, j + 15].GetValue<double>();
                         y++;
                     }
                     y = 0;
