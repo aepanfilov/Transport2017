@@ -207,8 +207,8 @@ namespace Транспорт2017.ГенераторПас
                 }
             }
         }
-//        Function Poisson_value(lambda) 'ïðè áîëüøèõ lambda çàêîí ðàñïðåäåëåíèÿ Ïóàññîíà
-//                                        'ïðèáëèæåííî çàìåíÿåòñÿ íîðìàëüíûì.
+//        Function Poisson_value(lambda) 'при больших lambda закон распределения Пуассона
+                                        //'приближенно заменяется нормальным.
 //    If lambda <= 30 Then
 //        x = 0
 //        a = Exp(-lambda)
