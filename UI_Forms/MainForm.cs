@@ -1049,6 +1049,7 @@ namespace Транспорт2017
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
             Calculate.LoadStopFromExcel();
+            Calculate.GeneratePass();
         }
     }
 }

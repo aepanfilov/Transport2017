@@ -11,10 +11,10 @@ namespace Транспорт2017.ГенераторПас
     {
         const int COUNT_DISTRICT = 8; // размерность матрицы
         const int COUNT_HOUR = 15; // размерность матрицы доли пассажиров, отъезжающих от остановки, в зависимости от времени прибытия
-
+        static Random rand = new Random();
 
         private static List<Stop> listStop;
-        private static List<Dist> listDist;
+        private static List<District> listDist;
 
         static double[,] mornWork; // матрица доли рабочих и молодёжи утром
         static double[,] mornPens; // матрица доли пенсионеров и школьников утром
@@ -27,35 +27,51 @@ namespace Транспорт2017.ГенераторПас
         public static void LoadStopFromExcel()
         {
             listStop = new List<Stop>();
+            listDist = new List<District>();
             FileInfo file = new FileInfo("данные\\1.xlsx");
             using (ExcelPackage package = new ExcelPackage(file))
             {
-                ExcelWorksheet routes = package.Workbook.Worksheets["Маршруты"];
-                int x = 2;
-                int codeStop;
+                int code;
+                ExcelWorksheet population = package.Workbook.Worksheets["Население"];
+                int x = 10;
                 do
                 {
-                    codeStop = routes.Cells[x, 1].GetValue<int>();
+                    code = population.Cells[x, 1].GetValue<int>();
+                    string nameDist = population.Cells[x, 2].GetValue<string>();
+                    if (code != 0)
+                    {
+                        listDist.Add(
+                        new District { CodeDistrict = code, NameDistrict = nameDist}
+                        );
+                    }
+                    x++;
+                }
+                while (code != 0);
+
+                ExcelWorksheet routes = package.Workbook.Worksheets["Маршруты"];
+                x = 2;
+                do
+                {
+                    code = routes.Cells[x, 1].GetValue<int>();
                     string nameStop = routes.Cells[x, 2].GetValue<string>();
                     string district = routes.Cells[x, 3].GetValue<string>();
                     int countPass = routes.Cells[x, 4].GetValue<int>();
                     int attraction = routes.Cells[x, 5].GetValue<int>();
-                    if (codeStop != 0) { 
-                        listStop.Add(
-                        new Stop { CodeStop = codeStop, NameStop = nameStop, District = district, CountPass = countPass, Attraction = attraction }
-                        );
+                    if (code != 0) {
+                        Stop stop = new Stop { CodeStop = code, NameStop = nameStop, District = district, CountPass = countPass, Attraction = attraction };
+                        listStop.Add(stop);
+                        District d = listDist.Find(xx => xx.NameDistrict == district);
+                        d.ListStop.Add(stop);
                     }
                     x++;
 
                 }
-                while (codeStop != 0);
-
-                ExcelWorksheet population = package.Workbook.Worksheets["Население"];
+                while (code != 0);
 
                 x = 0; // строки матрицы
                 int y = 0;  // столбцы матрицы
                 
-                 mornWork = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли рабочих и молодёжи утром
+                mornWork = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли рабочих и молодёжи утром
                 mornPens = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли пенсионеров и школьников утром
                 dayTime = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли людей в обеденное время
                 evenWork = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли рабочих и молодёжи вечером
@@ -92,12 +108,18 @@ namespace Транспорт2017.ГенераторПас
             }
         }
 
+        public static void Balance(string sheets_name, int n_district, double[,] morning_workers, double[,] morning_pensioners, double[,] day_time, 
+            double[,] evening_workers, double[,] evening_pensioners, double[,] time_distribution, int n_hour)
+        {
+
+        }
+        
         public static void GeneratePass()
         {
-            for (int n_hour = 1; n_hour <= COUNT_HOUR; n_hour++)
+            for (int n_hour = 0; n_hour < COUNT_HOUR; n_hour++)
             {
                 //Заполнение исходных данных для расчета пуассоновских пассажиров (строки 234-239 для всех районов)
-                for (int i_region = 1; i_region <= 8; i_region++)
+                for (int i_region = 0; i_region < 8; i_region++)
                 {
                     // For i_region = 1 To 8
                     //n_region_stops(i_region) = Cells(238, 3 + 23 * (i_region - 1)).Value
@@ -139,7 +161,7 @@ namespace Транспорт2017.ГенераторПас
                 //Заполнение численности на остановках на текущий час
                 double[,,,] matrFlowPas = new double[listStop.Count, COUNT_HOUR, COUNT_DISTRICT, 2];
                 int[,,,] matrCountPas = new int[listStop.Count, COUNT_HOUR, COUNT_DISTRICT, 2];
-                for (int i_region = 1; i_region <= COUNT_DISTRICT; i_region++)
+                for (int i_region = 0; i_region < COUNT_DISTRICT; i_region++)
                 {
                     double number_of_workers = 12;// Cells(401 + i_region + 13 * (n_hour - 1), 3).Value
                     double number_of_pensioners = 10;// Cells(401 + i_region + 13 * (n_hour - 1), 4).Value
@@ -207,14 +229,16 @@ namespace Транспорт2017.ГенераторПас
                 }
             }
         }
+                
         public static int Poisson_value(double lambda)
         {
             int poisson_value = 0;
+
             if (lambda <= 30)
             {
                 int x = 0;
                 double a = Math.Exp(-lambda);
-                Random rand = new Random();
+                
                 double FRand = rand.NextDouble();
                 double s = FRand;
                 do
@@ -228,7 +252,6 @@ namespace Транспорт2017.ГенераторПас
             }
             else
             {
-                Random rand = new Random();
                 double multi = rand.NextDouble();
                 double a1 = Math.Pow(-2 * Math.Log(multi), 0.5);
                 double a2 = Math.Cos(2 * Math.PI * multi);
