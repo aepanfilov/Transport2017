@@ -191,8 +191,8 @@ namespace Транспорт2017.ГенераторПас
                             //column_result1 = i + 5 + 23 * (region - 1)
                             //column_result2 = i + 13 + 23 * (region - 1)
 
-                            double lambda1 = matrFlowPas[k_stops, n_hour, i_region, 0] * time_percent1;
-                            double lambda2 = matrFlowPas[k_stops, n_hour, i_region, 1] * time_percent2;
+                            int lambda1 = (int)(matrFlowPas[k_stops, n_hour, i_region, 0] * time_percent1);
+                            int lambda2 = (int)(matrFlowPas[k_stops, n_hour, i_region, 1] * time_percent2);
                             //lambda1 = Cells(row_lambda, column_lambda1) * time_percent1
                             //lambda2 = Cells(row_lambda, column_lambda2) * time_percent2
                             int x_lambda1 = Poisson_value(lambda1);
@@ -207,8 +207,38 @@ namespace Транспорт2017.ГенераторПас
                 }
             }
         }
+        public static int Poisson_value(double lambda)
+        {
+            int poisson_value = 0;
+            if (lambda <= 30)
+            {
+                int x = 0;
+                double a = Math.Exp(-lambda);
+                Random rand = new Random();
+                double FRand = rand.NextDouble();
+                double s = FRand;
+                do
+                {
+                    x = x + 1;
+                    s = s * FRand;
+                }
+                while (s >= a);
+                poisson_value = x;
+                return poisson_value;
+            }
+            else
+            {
+                Random rand = new Random();
+                double multi = rand.NextDouble();
+                double a1 = Math.Pow(-2 * Math.Log(multi), 0.5);
+                double a2 = Math.Cos(2 * Math.PI * multi);
+                double a3 = Math.Pow(lambda, 0.5) * a1 * a2 + lambda;
+                poisson_value = (int)a3;
+                return poisson_value;
+            }    
+        }
 //        Function Poisson_value(lambda) 'при больших lambda закон распределения Пуассона
-                                        //'приближенно заменяется нормальным.
+//'приближенно заменяется нормальным.
 //    If lambda <= 30 Then
 //        x = 0
 //        a = Exp(-lambda)
@@ -231,9 +261,10 @@ namespace Транспорт2017.ГенераторПас
 //           Poisson_value = Int(a3)
 
 
-//  End If
+        //  End If
 
 
-//End Function
+        //End Function
     }
+
 }
