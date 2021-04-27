@@ -11,11 +11,14 @@ namespace Транспорт2017.ГенераторПас
     {
         const int COUNT_DISTRICT = 8; // размерность матрицы
         const int COUNT_HOUR = 15; // размерность матрицы доли пассажиров, отъезжающих от остановки, в зависимости от времени прибытия
+        const int TYPE_PASS = 4; // Школьники - 0, Студенты - 1, Рабочие - 2, Пенсионеры - 3
+
         static Random rand = new Random();
 
         private static List<Stop> listStop;
         private static List<District> listDist;
 
+        static int[,] countPass;
         static double[,] mornWork; // матрица доли рабочих и молодёжи утром
         static double[,] mornPens; // матрица доли пенсионеров и школьников утром
         static double[,] dayTime; // матрица доли людей в обеденное время
@@ -70,13 +73,22 @@ namespace Транспорт2017.ГенераторПас
 
                 x = 0; // строки матрицы
                 int y = 0;  // столбцы матрицы
-                
+
+                countPass = new int[COUNT_DISTRICT, TYPE_PASS]; // матрица количества людей каждого типа, проживающих в каком-либо районе
                 mornWork = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли рабочих и молодёжи утром
                 mornPens = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли пенсионеров и школьников утром
                 dayTime = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли людей в обеденное время
                 evenWork = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли рабочих и молодёжи вечером
                 evenPens = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли пенсионеров и школьников вечером
                 timeDist = new double[COUNT_DISTRICT, COUNT_HOUR]; // матрица доли пассажиров, отъезжающих от остановки, в зависимости от времени прибытия
+
+                for (int i = 0; i < COUNT_DISTRICT; i++)
+                {
+                    for (int j = 0; j < TYPE_PASS; j++)
+                    {
+
+                    }
+                }
 
                 for (int i = 0; i <COUNT_DISTRICT; i++)
                 {
@@ -108,10 +120,23 @@ namespace Транспорт2017.ГенераторПас
             }
         }
 
-        public static void Balance(string sheets_name, int n_district, double[,] morning_workers, double[,] morning_pensioners, double[,] day_time, 
+        public static void Balance(string sheets_name, int i_region,  double[,] morning_workers, double[,] morning_pensioners, double[,] day_time, 
             double[,] evening_workers, double[,] evening_pensioners, double[,] time_distribution, int n_hour)
         {
-
+            // коэффициенты для расчёта перерпспределения между потоками
+            double[,] k_flow_workers_morning = new double[COUNT_DISTRICT, COUNT_DISTRICT];
+            double[,] k_flow_pensioners_morning = new double[COUNT_DISTRICT, COUNT_DISTRICT];
+            double[,] k_flow_workers_daytime = new double[COUNT_DISTRICT, COUNT_DISTRICT];
+            double[,] k_flow_pensioners_daytime = new double[COUNT_DISTRICT, COUNT_DISTRICT];
+            double[,] k_flow_workers_evening = new double[COUNT_DISTRICT, COUNT_DISTRICT];
+            double[,] k_flow_pensioners_evening = new double[COUNT_DISTRICT, COUNT_DISTRICT];
+            double[] hour_region_workers = new double[COUNT_DISTRICT];
+            double[] hour_region_pensioners = new double[COUNT_DISTRICT];
+            n_hour = 1;
+            for (int i = 0; i < i_region; i++)
+            {
+                
+            }
         }
         
         public static void GeneratePass()
