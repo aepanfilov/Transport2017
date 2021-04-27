@@ -1050,6 +1050,7 @@ namespace Транспорт2017
         {
             Calculate.LoadStopFromExcel();
             Calculate.GeneratePass();
+            Calculate.SaveToSheets();
         }
     }
 }

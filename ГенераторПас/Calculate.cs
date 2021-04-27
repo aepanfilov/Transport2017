@@ -23,8 +23,12 @@ namespace Транспорт2017.ГенераторПас
         static double[,] mornPens; // матрица доли пенсионеров и школьников утром
         static double[,] dayTime; // матрица доли людей в обеденное время
         static double[,] evenWork; // матрица доли рабочих и молодёжи вечером
-        static double[,] evenPens ; // матрица доли пенсионеров и школьников вечером
-        static double[,] timeDist ; // матрица доли пассажиров, отъезжающих от остановки, в зависимости от времени прибытия
+        static double[,] evenPens; // матрица доли пенсионеров и школьников вечером
+        static double[,] timeDist; // матрица доли пассажиров, отъезжающих от остановки, в зависимости от времени прибытия
+        static double[,] ballWork; // матрица количества рабочих и молодёжи, находящихся в районе по часам
+        static double[,] ballPens; // матрица количества пенсионеров и школьников, находящихся в районе по часам
+        static int[,,,] matrCountPas;
+
 
 
         public static void LoadStopFromExcel()
@@ -71,22 +75,24 @@ namespace Транспорт2017.ГенераторПас
                 }
                 while (code != 0);
 
-                x = 0; // строки матрицы
-                int y = 0;  // столбцы матрицы
-
-                countPass = new int[COUNT_DISTRICT, TYPE_PASS]; // матрица количества людей каждого типа, проживающих в каком-либо районе
+                //countPass = new int[COUNT_DISTRICT, TYPE_PASS]; // матрица количества людей каждого типа, проживающих в каком-либо районе
                 mornWork = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли рабочих и молодёжи утром
                 mornPens = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли пенсионеров и школьников утром
                 dayTime = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли людей в обеденное время
                 evenWork = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли рабочих и молодёжи вечером
                 evenPens = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли пенсионеров и школьников вечером
                 timeDist = new double[COUNT_DISTRICT, COUNT_HOUR]; // матрица доли пассажиров, отъезжающих от остановки, в зависимости от времени прибытия
+                ballWork = new double[COUNT_DISTRICT, COUNT_HOUR]; // матрица количества рабочих и молодёжи, находящихся в районе по часам
+                ballPens = new double[COUNT_DISTRICT, COUNT_HOUR]; // матрица количества пенсионеров и школьников, находящихся в районе по часам
+
 
                 for (int i = 0; i < COUNT_DISTRICT; i++)
                 {
-                    for (int j = 0; j < TYPE_PASS; j++)
+                    for (int j = 0; j < COUNT_HOUR; j++)
                     {
-
+                        ballWork[i, j] = population.Cells[i + 402 + (13 * j), 3].GetValue<double>();
+                        // Cells(401 + i_region + 13 * (n_hour - 1), 3).Value
+                        ballPens[i, j] = population.Cells[i + 402 + (13 * j), 4].GetValue<double>();
                     }
                 }
 
@@ -94,28 +100,20 @@ namespace Транспорт2017.ГенераторПас
                 {
                     for (int j = 0; j < COUNT_DISTRICT; j++)
                     {
-                        mornWork[x, y] = population.Cells[i + 160, j + 3].GetValue<double>();
-                        mornPens[x, y] = population.Cells[i + 173, j + 3].GetValue<double>();
-                        dayTime[x, y] = population.Cells[i + 194, j + 3].GetValue<double>();
-                        evenWork[x, y] = population.Cells[i + 207, j + 3].GetValue<double>();
-                        evenPens[x, y] = population.Cells[i + 207, j + 15].GetValue<double>();
-                        y++;
+                        mornWork[i, j] = population.Cells[i + 160, j + 3].GetValue<double>();
+                        mornPens[i, j] = population.Cells[i + 173, j + 3].GetValue<double>();
+                        dayTime[i, j] = population.Cells[i + 194, j + 3].GetValue<double>();
+                        evenWork[i, j] = population.Cells[i + 207, j + 3].GetValue<double>();
+                        evenPens[i, j] = population.Cells[i + 207, j + 15].GetValue<double>();
                     }
-                    y = 0;
-                    x++;
                 }
 
-                x = 0;
-
-                for (int i = 220; i < COUNT_DISTRICT + 220; i++)
+                for (int i = 0; i < COUNT_DISTRICT ; i++)
                 {
-                    for (int j = 3; j < COUNT_HOUR + 3; j++)
+                    for (int j = 0; j < COUNT_HOUR ; j++)
                     {
-                        timeDist[x, y] = population.Cells[i, j].GetValue<double>();
-                        y++;
+                        timeDist[i, j] = population.Cells[i + 220, j + 3].GetValue<double>();
                     }
-                    y = 0;
-                    x++;
                 }
             }
         }
@@ -148,10 +146,8 @@ namespace Транспорт2017.ГенераторПас
                 {
                     // For i_region = 1 To 8
                     //n_region_stops(i_region) = Cells(238, 3 + 23 * (i_region - 1)).Value
-                    double number_of_workers = 12;// Cells(401 + i_region + 13 * (n_hour - 1), 3).Value
-                    double number_of_pensioners = 10;// Cells(401 + i_region + 13 * (n_hour - 1), 4).Value
-                                                     //Cells(234, 1 + 23 * (i_region - 1)).Value = number_of_workers
-                                                     //Cells(236, 1 + 23 * (i_region - 1)).Value = number_of_pensioners
+                    double number_of_workers = ballWork[i_region, n_hour];
+                    double number_of_pensioners = ballPens[i_region, n_hour];
 
 
                     double number_of_workers_hour = number_of_workers * timeDist[i_region, n_hour];
@@ -185,7 +181,7 @@ namespace Транспорт2017.ГенераторПас
 
                 //Заполнение численности на остановках на текущий час
                 double[,,,] matrFlowPas = new double[listStop.Count, COUNT_HOUR, COUNT_DISTRICT, 2];
-                int[,,,] matrCountPas = new int[listStop.Count, COUNT_HOUR, COUNT_DISTRICT, 2];
+                matrCountPas = new int[listStop.Count, COUNT_HOUR, COUNT_DISTRICT, 2];
                 for (int i_region = 0; i_region < COUNT_DISTRICT; i_region++)
                 {
                     double number_of_workers = 12;// Cells(401 + i_region + 13 * (n_hour - 1), 3).Value
@@ -238,8 +234,8 @@ namespace Транспорт2017.ГенераторПас
                             //column_result1 = i + 5 + 23 * (region - 1)
                             //column_result2 = i + 13 + 23 * (region - 1)
 
-                            int lambda1 = (int)(matrFlowPas[k_stops, n_hour, i_region, 0] * time_percent1);
-                            int lambda2 = (int)(matrFlowPas[k_stops, n_hour, i_region, 1] * time_percent2);
+                            double lambda1 = matrFlowPas[k_stops, n_hour, i_region, 0] * time_percent1;
+                            double lambda2 = matrFlowPas[k_stops, n_hour, i_region, 1] * time_percent2;
                             //lambda1 = Cells(row_lambda, column_lambda1) * time_percent1
                             //lambda2 = Cells(row_lambda, column_lambda2) * time_percent2
                             int x_lambda1 = Poisson_value(lambda1);
@@ -252,6 +248,29 @@ namespace Транспорт2017.ГенераторПас
                         }
                     }
                 }
+            }
+        }
+
+        public static void SaveToSheets()
+        {
+            FileStream file = File.Create("данные\\2.xlsx");
+            using (ExcelPackage package = new ExcelPackage(file))
+            {
+                ExcelWorksheet excelSh = package.Workbook.Worksheets.Add("Test");
+                for (int i_hour = 0; i_hour < COUNT_HOUR; i_hour++)
+                {
+                    excelSh.Cells[1, 1 + 20 * i_hour].Value = (i_hour + 6) + ":00";
+                    for (int j_dist = 0; j_dist < COUNT_DISTRICT; j_dist++)
+                    {
+                        excelSh.Cells[2, 2 + j_dist + 20 * i_hour].Value = listDist[j_dist].NameDistrict;
+                        for (int k_stop = 0; k_stop < listDist[j_dist].CountStops; k_stop++)
+                        {
+                            excelSh.Cells[3 + k_stop, 2 + j_dist + 20 * i_hour].Value = matrCountPas[k_stop, i_hour, j_dist, 0];
+                            excelSh.Cells[3 + k_stop, 2 + COUNT_DISTRICT + j_dist + 20 * i_hour].Value = matrCountPas[k_stop, i_hour, j_dist, 1];
+                        }
+                    }
+                }
+                package.Save();
             }
         }
                 
