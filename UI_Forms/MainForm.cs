@@ -1048,9 +1048,16 @@ namespace Транспорт2017
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
+            DateTime dt = DateTime.Now;
+
             Calculate.LoadStopFromExcel();
+            DateTime dt2 = DateTime.Now;
+
             Calculate.GeneratePass();
-            Calculate.SaveToSheets();
+            //Calculate.SaveToSheets();
+
+            DateTime dt3 = DateTime.Now;
+            MessageBox.Show($"готово Excel={(dt2-dt).TotalMilliseconds} всего={(dt3 - dt).TotalMilliseconds}");
         }
     }
 }

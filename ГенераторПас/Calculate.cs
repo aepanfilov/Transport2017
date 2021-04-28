@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Транспорт2017.ГенераторПас
 {
@@ -27,7 +25,7 @@ namespace Транспорт2017.ГенераторПас
         static double[,] timeDist; // матрица доли пассажиров, отъезжающих от остановки, в зависимости от времени прибытия
         static double[,] ballWork; // матрица количества рабочих и молодёжи, находящихся в районе по часам
         static double[,] ballPens; // матрица количества пенсионеров и школьников, находящихся в районе по часам
-        static int[,,,] matrCountPas;
+        static int[,,] matrCountPasWork, matrCountPasPens;
 
 
 
@@ -41,6 +39,7 @@ namespace Транспорт2017.ГенераторПас
                 int code;
                 ExcelWorksheet population = package.Workbook.Worksheets["Население"];
                 int x = 10;
+                //загрузка списка районов
                 do
                 {
                     code = population.Cells[x, 1].GetValue<int>();
@@ -48,7 +47,7 @@ namespace Транспорт2017.ГенераторПас
                     if (code != 0)
                     {
                         listDist.Add(
-                        new District { CodeDistrict = code, NameDistrict = nameDist}
+                        new District { CodeDistrict = code, NameDistrict = nameDist }
                         );
                     }
                     x++;
@@ -57,6 +56,7 @@ namespace Транспорт2017.ГенераторПас
 
                 ExcelWorksheet routes = package.Workbook.Worksheets["Маршруты"];
                 x = 2;
+                //загрузка списка остановок
                 do
                 {
                     code = routes.Cells[x, 1].GetValue<int>();
@@ -64,7 +64,8 @@ namespace Транспорт2017.ГенераторПас
                     string district = routes.Cells[x, 3].GetValue<string>();
                     int countPass = routes.Cells[x, 4].GetValue<int>();
                     int attraction = routes.Cells[x, 5].GetValue<int>();
-                    if (code != 0) {
+                    if (code != 0)
+                    {
                         Stop stop = new Stop { CodeStop = code, NameStop = nameStop, District = district, CountPass = countPass, Attraction = attraction };
                         listStop.Add(stop);
                         District d = listDist.Find(xx => xx.NameDistrict == district);
@@ -74,6 +75,23 @@ namespace Транспорт2017.ГенераторПас
 
                 }
                 while (code != 0);
+
+                //загрузка долей жителей зоны остановок
+                for (int i_region = 0; i_region < COUNT_DISTRICT; i_region++)
+                {
+                    x = 41;
+                    do
+                    {
+                        code = population.Cells[x, 1 + 4 * i_region].GetValue<int>();
+                        double part_area = population.Cells[x, 4 + 4 * i_region].GetValue<double>();
+                        if (code != 0)
+                        {
+                            listStop[code - 1].PercentageSitizen = part_area;
+                        }
+                        x++;
+                    }
+                    while (code != 0);
+                }
 
                 //countPass = new int[COUNT_DISTRICT, TYPE_PASS]; // матрица количества людей каждого типа, проживающих в каком-либо районе
                 mornWork = new double[COUNT_DISTRICT, COUNT_DISTRICT]; // матрица доли рабочих и молодёжи утром
@@ -86,6 +104,7 @@ namespace Транспорт2017.ГенераторПас
                 ballPens = new double[COUNT_DISTRICT, COUNT_HOUR]; // матрица количества пенсионеров и школьников, находящихся в районе по часам
 
 
+                //загрузка числа пассажиров, находящихся в районах по часам
                 for (int i = 0; i < COUNT_DISTRICT; i++)
                 {
                     for (int j = 0; j < COUNT_HOUR; j++)
@@ -96,7 +115,8 @@ namespace Транспорт2017.ГенераторПас
                     }
                 }
 
-                for (int i = 0; i <COUNT_DISTRICT; i++)
+                //загрузка прочих матриц
+                for (int i = 0; i < COUNT_DISTRICT; i++)
                 {
                     for (int j = 0; j < COUNT_DISTRICT; j++)
                     {
@@ -108,9 +128,10 @@ namespace Транспорт2017.ГенераторПас
                     }
                 }
 
-                for (int i = 0; i < COUNT_DISTRICT ; i++)
+                //загрузка матрицы распределния по времени
+                for (int i = 0; i < COUNT_DISTRICT; i++)
                 {
-                    for (int j = 0; j < COUNT_HOUR ; j++)
+                    for (int j = 0; j < COUNT_HOUR; j++)
                     {
                         timeDist[i, j] = population.Cells[i + 220, j + 3].GetValue<double>();
                     }
@@ -118,7 +139,7 @@ namespace Транспорт2017.ГенераторПас
             }
         }
 
-        public static void Balance(string sheets_name, int i_region,  double[,] morning_workers, double[,] morning_pensioners, double[,] day_time, 
+        public static void Balance(string sheets_name, int i_region, double[,] morning_workers, double[,] morning_pensioners, double[,] day_time,
             double[,] evening_workers, double[,] evening_pensioners, double[,] time_distribution, int n_hour)
         {
             // коэффициенты для расчёта перерпспределения между потоками
@@ -133,28 +154,31 @@ namespace Транспорт2017.ГенераторПас
             n_hour = 1;
             for (int i = 0; i < i_region; i++)
             {
-                
+
             }
         }
-        
+
         public static void GeneratePass()
         {
+            matrCountPasWork = new int[listStop.Count, COUNT_HOUR, COUNT_DISTRICT];
+            matrCountPasPens = new int[listStop.Count, COUNT_HOUR, COUNT_DISTRICT];
+
             for (int n_hour = 0; n_hour < COUNT_HOUR; n_hour++)
             {
-                //Заполнение исходных данных для расчета пуассоновских пассажиров (строки 234-239 для всех районов)
-                for (int i_region = 0; i_region < 8; i_region++)
-                {
-                    // For i_region = 1 To 8
-                    //n_region_stops(i_region) = Cells(238, 3 + 23 * (i_region - 1)).Value
-                    double number_of_workers = ballWork[i_region, n_hour];
-                    double number_of_pensioners = ballPens[i_region, n_hour];
+                ////Заполнение исходных данных для расчета пуассоновских пассажиров (строки 234-239 для всех районов)
+                //for (int i_region = 0; i_region < 8; i_region++)
+                //{
+                //    // For i_region = 1 To 8
+                //    //n_region_stops(i_region) = Cells(238, 3 + 23 * (i_region - 1)).Value
+                //    double number_of_workers = ballWork[i_region, n_hour];
+                //    double number_of_pensioners = ballPens[i_region, n_hour];
 
 
-                    double number_of_workers_hour = number_of_workers * timeDist[i_region, n_hour];
-                    //Cells(234, 2 + 23 * (i_region - 1)).Value = number_of_workers_hour
-                    double number_of_pensioners_hour = number_of_pensioners * timeDist[i_region, n_hour];
-                    //Cells(236, 2 + 23 * (i_region - 1)).Value = number_of_pensioners_hour
-                }
+                //    double number_of_workers_hour = number_of_workers * timeDist[i_region, n_hour];
+                //    //Cells(234, 2 + 23 * (i_region - 1)).Value = number_of_workers_hour
+                //    double number_of_pensioners_hour = number_of_pensioners * timeDist[i_region, n_hour];
+                //    //Cells(236, 2 + 23 * (i_region - 1)).Value = number_of_pensioners_hour
+                //}
 
                 /*For i_region = 1 To 8 'заполнение строки 239 (средние доли потока)для всех районов
                             ggg = Cells(234, 2 + 23 * (i_region - 1)).Value / n_region_stops(i_region)
@@ -180,12 +204,12 @@ namespace Транспорт2017.ГенераторПас
 
 
                 //Заполнение численности на остановках на текущий час
-                double[,,,] matrFlowPas = new double[listStop.Count, COUNT_HOUR, COUNT_DISTRICT, 2];
-                matrCountPas = new int[listStop.Count, COUNT_HOUR, COUNT_DISTRICT, 2];
+                double[,] matrFlowPasWork = new double[listStop.Count, COUNT_DISTRICT];
+                double[,] matrFlowPasPens = new double[listStop.Count, COUNT_DISTRICT];
                 for (int i_region = 0; i_region < COUNT_DISTRICT; i_region++)
                 {
-                    double number_of_workers = 12;// Cells(401 + i_region + 13 * (n_hour - 1), 3).Value
-                    double number_of_pensioners = 10;// Cells(401 + i_region + 13 * (n_hour - 1), 4).Value
+                    double number_of_workers = ballWork[i_region, n_hour];// Cells(401 + i_region + 13 * (n_hour - 1), 3).Value
+                    double number_of_pensioners = ballPens[i_region, n_hour];// Cells(401 + i_region + 13 * (n_hour - 1), 4).Value
 
 
                     double number_of_workers_hour = number_of_workers * timeDist[i_region, n_hour];
@@ -194,11 +218,11 @@ namespace Транспорт2017.ГенераторПас
                     for (int j_stops = 0; j_stops < listDist[i_region].CountStops; j_stops++)
                     {
                         Stop stop = listDist[i_region].GetStop(j_stops);
-                        matrFlowPas[j_stops, n_hour, i_region, 0] = number_of_workers_hour * stop.PercentageSitizen;
+                        matrFlowPasWork[stop.CodeStop - 1, /*n_hour, */i_region] = number_of_workers_hour * stop.PercentageSitizen;
                         //Cells(240 + j_stops, 4 + 23 * (i_region - 1)).Value = _
                         //    Cells(234, 2 + 23 * (i_region - 1)).Value * Cells(40 + j_stops, 4 + 4 * (i_region - 1)).Value
 
-                        matrFlowPas[j_stops, n_hour, i_region, 1] = number_of_pensioners_hour * stop.PercentageSitizen;
+                        matrFlowPasPens[stop.CodeStop - 1, /*n_hour, */i_region] = number_of_pensioners_hour * stop.PercentageSitizen;
                         //Cells(240 + j_stops, 5 + 23 * (i_region - 1)).Value = _
                         //    Cells(236, 2 + 23 * (i_region - 1)).Value * Cells(40 + j_stops, 4 + 4 * (i_region - 1)).Value
 
@@ -226,6 +250,7 @@ namespace Транспорт2017.ГенераторПас
                         //'time_distribution = Cells(219 + region, 2 + i).Value ' учет неравномерности пассажиропотока по времени
                         for (int k_stops = 0; k_stops < listDist[i_region].CountStops; k_stops++)
                         {
+                            Stop stop = listDist[i_region].ListStop[k_stops];
                             //For k = 1 To n_region_stops(region)
                             //row_lambda = 240 + k
                             //row_result = row_lambda
@@ -234,14 +259,14 @@ namespace Транспорт2017.ГенераторПас
                             //column_result1 = i + 5 + 23 * (region - 1)
                             //column_result2 = i + 13 + 23 * (region - 1)
 
-                            double lambda1 = matrFlowPas[k_stops, n_hour, i_region, 0] * time_percent1;
-                            double lambda2 = matrFlowPas[k_stops, n_hour, i_region, 1] * time_percent2;
+                            double lambda1 = matrFlowPasWork[stop.CodeStop - 1, /*n_hour,*/ i_region] * time_percent1;
+                            double lambda2 = matrFlowPasPens[stop.CodeStop - 1, /*n_hour,*/ i_region] * time_percent2;
                             //lambda1 = Cells(row_lambda, column_lambda1) * time_percent1
                             //lambda2 = Cells(row_lambda, column_lambda2) * time_percent2
                             int x_lambda1 = Poisson_value(lambda1);
                             int x_lambda2 = Poisson_value(lambda2);
-                            matrCountPas[k_stops, n_hour, i_region, 0] = x_lambda1;
-                            matrCountPas[k_stops, n_hour, i_region, 1] = x_lambda2;
+                            matrCountPasWork[stop.CodeStop - 1, n_hour, i_region] = x_lambda1;
+                            matrCountPasPens[stop.CodeStop - 1, n_hour, i_region] = x_lambda2;
                             //Cells(row_result, column_result1).Value = x_lambda1
                             //Cells(row_result, column_result2).Value = x_lambda2
 
@@ -263,36 +288,34 @@ namespace Транспорт2017.ГенераторПас
                     for (int j_dist = 0; j_dist < COUNT_DISTRICT; j_dist++)
                     {
                         excelSh.Cells[2, 2 + j_dist + 20 * i_hour].Value = listDist[j_dist].NameDistrict;
-                        for (int k_stop = 0; k_stop < listDist[j_dist].CountStops; k_stop++)
+                        excelSh.Cells[2, 2 + COUNT_DISTRICT + j_dist + 20 * i_hour].Value = listDist[j_dist].NameDistrict;
+                        for (int k_stop = 0; k_stop < listStop.Count; k_stop++)
                         {
-                            excelSh.Cells[3 + k_stop, 2 + j_dist + 20 * i_hour].Value = matrCountPas[k_stop, i_hour, j_dist, 0];
-                            excelSh.Cells[3 + k_stop, 2 + COUNT_DISTRICT + j_dist + 20 * i_hour].Value = matrCountPas[k_stop, i_hour, j_dist, 1];
+                            excelSh.Cells[3 + k_stop, 2 + j_dist + 20 * i_hour].Value = matrCountPasWork[k_stop, i_hour, j_dist];
+                            excelSh.Cells[3 + k_stop, 2 + COUNT_DISTRICT + j_dist + 20 * i_hour].Value = matrCountPasPens[k_stop, i_hour, j_dist];
                         }
                     }
                 }
                 package.Save();
             }
+            file.Close();
         }
-                
+
         public static int Poisson_value(double lambda)
         {
-            int poisson_value = 0;
-
             if (lambda <= 30)
             {
                 int x = 0;
                 double a = Math.Exp(-lambda);
-                
+
                 double FRand = rand.NextDouble();
                 double s = FRand;
-                do
+                while (s >= a)
                 {
                     x = x + 1;
                     s = s * FRand;
                 }
-                while (s >= a);
-                poisson_value = x;
-                return poisson_value;
+                return x;
             }
             else
             {
@@ -300,32 +323,31 @@ namespace Транспорт2017.ГенераторПас
                 double a1 = Math.Pow(-2 * Math.Log(multi), 0.5);
                 double a2 = Math.Cos(2 * Math.PI * multi);
                 double a3 = Math.Pow(lambda, 0.5) * a1 * a2 + lambda;
-                poisson_value = (int)a3;
-                return poisson_value;
-            }    
+                return (int)a3;
+            }
         }
-//        Function Poisson_value(lambda) 'при больших lambda закон распределения Пуассона
-//'приближенно заменяется нормальным.
-//    If lambda <= 30 Then
-//        x = 0
-//        a = Exp(-lambda)
-//        r = Rnd() * 10001
-//        FRand = r / 10000
-//        s = FRand
-//        Do While s >= a
-//            x = x + 1
-//            r = Rnd() * 10001
-//            FRand = r / 10000
-//            s = s* FRand
-//        Loop
-//        Poisson_value = x
-//        Else
-//            multi = Rnd()
-//            zzzz = Log(Exp(1))
-//            a1 = (-2 * Log(multi)) ^ (0.5)
-//            a2 = Cos(2 * 3.141592 * multi)
-//            a3 = (lambda ^ 0.5) * a1* a2 + lambda
-//           Poisson_value = Int(a3)
+        //        Function Poisson_value(lambda) 'при больших lambda закон распределения Пуассона
+        //'приближенно заменяется нормальным.
+        //    If lambda <= 30 Then
+        //        x = 0
+        //        a = Exp(-lambda)
+        //        r = Rnd() * 10001
+        //        FRand = r / 10000
+        //        s = FRand
+        //        Do While s >= a
+        //            x = x + 1
+        //            r = Rnd() * 10001
+        //            FRand = r / 10000
+        //            s = s* FRand
+        //        Loop
+        //        Poisson_value = x
+        //        Else
+        //            multi = Rnd()
+        //            zzzz = Log(Exp(1))
+        //            a1 = (-2 * Log(multi)) ^ (0.5)
+        //            a2 = Cos(2 * 3.141592 * multi)
+        //            a3 = (lambda ^ 0.5) * a1* a2 + lambda
+        //           Poisson_value = Int(a3)
 
 
         //  End If
