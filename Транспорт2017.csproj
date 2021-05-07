@@ -98,6 +98,7 @@
     <Compile Include="Classes\Перегон.cs" />
     <Compile Include="ГенераторПас\Calculate.cs" />
     <Compile Include="ГенераторПас\District.cs" />
+    <Compile Include="ГенераторПас\Passenger.cs" />
     <Compile Include="ГенераторПас\Stop.cs" />
     <Compile Include="ПоказателиРаботы\ПоказателиРаботыДня.cs" />
     <Compile Include="ПоказателиРаботы\ПоказателиРаботыМаршрута.cs" />
