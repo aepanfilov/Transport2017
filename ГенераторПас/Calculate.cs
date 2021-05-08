@@ -391,9 +391,9 @@ namespace Транспорт2017.ГенераторПас
                             for (int n_passengers = 0; n_passengers < n_passengers_region; n_passengers++)
                             {
                                 int minutes = rand.Next(0, 60);
-                                DateTime dTime = new DateTime(1, 1, 1, 6 + i_hour, minutes, 0);
+                                TimeSpan TimeS = new TimeSpan(6 + i_hour, minutes, 0);
                                 int codeFinish = ChoiseOfStop(listStop[i_stop], j_region);
-                                listPass.Add(new Passenger { CodeStopStart = i_stop, Time = dTime, CodeDistrictFinish = j_region,  CodeStopFinish = codeFinish }); 
+                                listPass.Add(new Passenger { CodeStopStart = i_stop, Time = TimeS, CodeDistrictFinish = j_region,  CodeStopFinish = codeFinish }); 
                             }
                         }
                     }
@@ -411,9 +411,8 @@ namespace Транспорт2017.ГенераторПас
             {
                 return (int)(shance * listStop.Count) + 1;
             }
-
             // вероятность выбора остановки в заданном районе
-            if (shance >= probability_of_arbitrary_choise)
+            else
             {
                 double zzz = rand.NextDouble();
                 // вероятность выбора остановки без пересадки
@@ -508,9 +507,10 @@ namespace Транспорт2017.ГенераторПас
                         }
                     }
                 }
-                excelSh = package.Workbook.Worksheets.Add("Test_2");
+                excelSh = package.Workbook.Worksheets.Add("trafic");
                 int sum = 0;
                 int global = 0;
+                TimeSpan time_6 = new TimeSpan(6,0,0);
                 for (int i_stop = 0; i_stop < listStop.Count(); i_stop++)
                 {
                     excelSh.Cells[3, 1 + 5 * i_stop].Value = listStop[i_stop].CodeStop;
@@ -521,7 +521,7 @@ namespace Транспорт2017.ГенераторПас
                     for (int j = sum; j < global; j++)
                     {
                         //string ghg = Convert.ToString(listPass[j].Time.ToString("H:mm"));
-                        excelSh.Cells[5 + j - sum, 1 + 5 * i_stop].Value = Convert.ToString(listPass[j].Time.ToString("H:mm"));
+                        excelSh.Cells[5 + j - sum, 1 + 5 * i_stop].Value = (listPass[j].Time - time_6).TotalMinutes;
                         excelSh.Cells[5 + j - sum, 2 + 5 * i_stop].Value = listPass[j].CodeDistrictFinish + 1;
                         excelSh.Cells[5 + j - sum, 3 + 5 * i_stop].Value = listPass[j].CodeStopFinish + 1;
                     }
