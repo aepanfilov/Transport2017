@@ -1054,10 +1054,12 @@ namespace Транспорт2017
             DateTime dt2 = DateTime.Now;
 
             Calculate.GeneratePass();
-            Calculate.DistributePass();
+            List<Passenger> listPass = Calculate.DistributePass();
             DateTime dt3 = DateTime.Now;
-            Calculate.SaveToSheets_test();
+
+            Calculate.SaveToSheets_test(listPass);
             DateTime dt4 = DateTime.Now;
+
             MessageBox.Show($"готово загрузка={(dt2-dt).TotalMilliseconds} просчёты={(dt3 - dt2).TotalMilliseconds} сохранение={(dt4 - dt3).TotalMilliseconds} всего={(dt4 - dt).TotalMilliseconds}");
         }
     }

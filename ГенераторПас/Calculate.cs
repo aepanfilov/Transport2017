@@ -182,11 +182,16 @@ namespace Транспорт2017.ГенераторПас
             }
         }
 
+        //static double[,] matrFlowPasWork;//2
+        //static double[,] matrFlowPasPens;
         public static void GeneratePass()
         {
             SetCorrespondenceStops();
             matrCountPasWork = new int[listStop.Count, COUNT_HOUR, COUNT_DISTRICT];
             matrCountPasPens = new int[listStop.Count, COUNT_HOUR, COUNT_DISTRICT];
+
+            //matrFlowPasWork = new double[listStop.Count, COUNT_HOUR];//2
+            //matrFlowPasPens = new double[listStop.Count, COUNT_HOUR];
 
             for (int n_hour = 0; n_hour < COUNT_HOUR; n_hour++)
             {
@@ -229,13 +234,16 @@ namespace Транспорт2017.ГенераторПас
 
 
                 //Заполнение численности на остановках на текущий час
-                double[,] matrFlowPasWork = new double[listStop.Count, COUNT_DISTRICT];
-                double[,] matrFlowPasPens = new double[listStop.Count, COUNT_DISTRICT];
+                //double[,] matrFlowPasWork = new double[listStop.Count, COUNT_DISTRICT];
+                //double[,] matrFlowPasPens = new double[listStop.Count, COUNT_DISTRICT];
+
+                double[] matrFlowPasWork = new double[listStop.Count];//1
+                double[] matrFlowPasPens = new double[listStop.Count];
+
                 for (int i_region = 0; i_region < COUNT_DISTRICT; i_region++)
                 {
                     double number_of_workers = ballWork[i_region, n_hour];// Cells(401 + i_region + 13 * (n_hour - 1), 3).Value
                     double number_of_pensioners = ballPens[i_region, n_hour];// Cells(401 + i_region + 13 * (n_hour - 1), 4).Value
-
 
                     double number_of_workers_hour = number_of_workers * timeDist[i_region, n_hour];
                     double number_of_pensioners_hour = number_of_pensioners * timeDist[i_region, n_hour];
@@ -243,58 +251,36 @@ namespace Транспорт2017.ГенераторПас
                     for (int j_stops = 0; j_stops < listDist[i_region].CountStops; j_stops++)
                     {
                         Stop stop = listDist[i_region].GetStop(j_stops);
-                        matrFlowPasWork[stop.CodeStop - 1, /*n_hour, */i_region] = number_of_workers_hour * stop.PercentageSitizen;
-                        //Cells(240 + j_stops, 4 + 23 * (i_region - 1)).Value = _
-                        //    Cells(234, 2 + 23 * (i_region - 1)).Value * Cells(40 + j_stops, 4 + 4 * (i_region - 1)).Value
+                        //matrFlowPasWork[stop.CodeStop - 1, /*n_hour, */i_region] = number_of_workers_hour * stop.PercentageSitizen;
+                        matrFlowPasWork[stop.CodeStop - 1] = number_of_workers_hour * stop.PercentageSitizen;
+                        //matrFlowPasWork[stop.CodeStop - 1,n_hour] = number_of_workers_hour * stop.PercentageSitizen;
 
-                        matrFlowPasPens[stop.CodeStop - 1, /*n_hour, */i_region] = number_of_pensioners_hour * stop.PercentageSitizen;
-                        //Cells(240 + j_stops, 5 + 23 * (i_region - 1)).Value = _
-                        //    Cells(236, 2 + 23 * (i_region - 1)).Value * Cells(40 + j_stops, 4 + 4 * (i_region - 1)).Value
-
-                        //Cells(240 + j_stops, 3 + 23 * (i_region - 1)).Value = _
-                        //    Cells(240 + j_stops, 4 + 23 * (i_region - 1)).Value + Cells(240 + j_stops, 5 + 23 * (i_region - 1)).Value
+                        //matrFlowPasPens[stop.CodeStop - 1, /*n_hour, */i_region] = number_of_pensioners_hour * stop.PercentageSitizen;
+                        matrFlowPasPens[stop.CodeStop - 1] = number_of_pensioners_hour * stop.PercentageSitizen;
+                        //matrFlowPasPens[stop.CodeStop - 1,n_hour] = number_of_pensioners_hour * stop.PercentageSitizen;
                     }
                 }
 
                 for (int i_region = 0; i_region < COUNT_DISTRICT; i_region++)
-                {
-                    //For region = 1 To 8 ???
-                    //    column_data1 = 4 + 23 * (region - 1) ???
-                    //    column_data2 = 5 + 23 * (region - 1) ???
-                    //    j_max = Cells(238, 3 + 23 * (region - 1)).Value ???
-                    //    Range(Cells(241, 6 + 23 * (region - 1)), Cells(240 + j_max, 21 + 23 * (region - 1))).Clear ???
-
-                    //For i = 1 To 8 'Цикл по числу остановок для данного района
+                {                   
                     for (int j_region = 0; j_region < COUNT_DISTRICT; j_region++)
                     {
-
-                        double time_percent1 = mornWork[i_region, j_region];
-                        double time_percent2 = mornPens[i_region, j_region];
-                        //time_percent1 = Cells(159 + region, 2 + i).Value ' учет различий в перетоках между районами для работающих
-                        //  time_percent2 = Cells(172 + region, 2 + i).Value ' то же, для пенсионеров
-                        //'time_distribution = Cells(219 + region, 2 + i).Value ' учет неравномерности пассажиропотока по времени
+                        double time_percent1 = mornWork[i_region, j_region];//учет различий в перетоках между районами для работающих
+                        double time_percent2 = mornPens[i_region, j_region];//то же, для пенсионеров
+                         //Цикл по числу остановок района прибытия
                         for (int k_stops = 0; k_stops < listDist[i_region].CountStops; k_stops++)
                         {
                             Stop stop = listDist[i_region].ListStop[k_stops];
-                            //For k = 1 To n_region_stops(region)
-                            //row_lambda = 240 + k
-                            //row_result = row_lambda
-                            //column_lambda1 = 4 + 23 * (region - 1)
-                            //column_lambda2 = 5 + 23 * (region - 1)
-                            //column_result1 = i + 5 + 23 * (region - 1)
-                            //column_result2 = i + 13 + 23 * (region - 1)
-
-                            double lambda1 = matrFlowPasWork[stop.CodeStop - 1, /*n_hour,*/ j_region] * time_percent1;
-                            double lambda2 = matrFlowPasPens[stop.CodeStop - 1, /*n_hour,*/ j_region] * time_percent2;
-                            //lambda1 = Cells(row_lambda, column_lambda1) * time_percent1
-                            //lambda2 = Cells(row_lambda, column_lambda2) * time_percent2
+                            //double lambda1 = matrFlowPasWork[stop.CodeStop - 1, /*n_hour,*/ j_region] * time_percent1;
+                            //double lambda2 = matrFlowPasPens[stop.CodeStop - 1, /*n_hour,*/ j_region] * time_percent2;
+                            double lambda1 = matrFlowPasWork[stop.CodeStop - 1] * time_percent1;//1
+                            double lambda2 = matrFlowPasPens[stop.CodeStop - 1] * time_percent2;
+                            //double lambda1 = matrFlowPasWork[stop.CodeStop - 1,n_hour] * time_percent1;//2
+                            //double lambda2 = matrFlowPasPens[stop.CodeStop - 1,n_hour] * time_percent2;
                             int x_lambda1 = Poisson_value(lambda1);
                             int x_lambda2 = Poisson_value(lambda2);
                             matrCountPasWork[stop.CodeStop - 1, n_hour, j_region] = x_lambda1;
                             matrCountPasPens[stop.CodeStop - 1, n_hour, j_region] = x_lambda2;
-                            //Cells(row_result, column_result1).Value = x_lambda1
-                            //Cells(row_result, column_result2).Value = x_lambda2
-
                         }
                     }
                 }
@@ -419,6 +405,10 @@ namespace Транспорт2017.ГенераторПас
                 if (zzz <= probability_without_jump)
                 {
                     List<Stop> list_stop_region = stopStart.StopWoTransfer.Where(x => x.District == listDist[j_region].NameDistrict).ToList();
+                    //если нет остановки в выбранном районе - выход с -1
+                    if (list_stop_region.Count == 0)
+                        return -2;
+
                     // формирование классов для каждой остановки
                     List<int> list_group = new List<int>();
                     foreach (Stop stop in list_stop_region)
@@ -432,8 +422,13 @@ namespace Транспорт2017.ГенераторПас
                             }
                         }
                     }
-                    int count_group= list_group.Distinct().Count();
-                    int i_group = rand.Next(count_group); // номер класса, куда поедет пассажир
+                    //int count_group= list_group.Distinct().Count();
+                    //int i_group = rand.Next(count_group); // номер класса, куда поедет пассажир
+                    var list_group_dist = list_group.Distinct();
+                    int count_group = list_group_dist.Count();
+                    int uuu=rand.Next(count_group);
+                    int i_group = list_group_dist.ElementAt(uuu);// номер класса, куда поедет пассажир
+
                     int count_stop_group = list_group.Where(x => x == i_group).Count();
                     int number_of_stop = (int)(count_stop_group * rand.NextDouble());
                     int n_of_stop = 0;
@@ -453,6 +448,10 @@ namespace Транспорт2017.ГенераторПас
                 else
                 {
                     List<Stop> list_stop_region = stopStart.StopWithTransfer.Where(x => x.District == listDist[j_region].NameDistrict).ToList();
+                    //если нет остановки в выбранном районе - выход с -1
+                    if (list_stop_region.Count == 0)
+                        return -2;
+
                     // формирование классов для каждой остановки
                     List<int> list_group = new List<int>();
                     foreach (Stop stop in list_stop_region)
@@ -466,8 +465,13 @@ namespace Транспорт2017.ГенераторПас
                             }
                         }
                     }
-                    int count_group = list_group.Distinct().Count();
-                    int i_group = rand.Next(count_group); // номер класса, куда поедет пассажир
+                    ////int count_group = list_group.Distinct().Count();
+                    //int i_group = rand.Next(count_group); // номер класса, куда поедет пассажир
+                    var list_group_dist = list_group.Distinct();
+                    int count_group = list_group_dist.Count();
+                    int uuu = rand.Next(count_group);
+                    int i_group = list_group_dist.ElementAt(uuu);// номер класса, куда поедет пассажир
+
                     int count_stop_group = list_group.Where(x => x == i_group).Count();
                     int number_of_stop = (int)(count_stop_group * rand.NextDouble());
                     int n_of_stop = 0;
@@ -484,12 +488,12 @@ namespace Транспорт2017.ГенераторПас
                     }
                 }
             }
-            return -1; // если ошибка
+            return -2; // если ошибка
         }
-        public static void SaveToSheets_test()
+        public static void SaveToSheets_test(List<Passenger> listPass)
         {
             FileStream file = File.Create("данные\\2.xlsx");
-            List<Passenger> listPass = DistributePass();
+            //List<Passenger> listPass = DistributePass();
             using (ExcelPackage package = new ExcelPackage(file))
             {
                 ExcelWorksheet excelSh = package.Workbook.Worksheets.Add("Test_1");
@@ -507,9 +511,41 @@ namespace Транспорт2017.ГенераторПас
                         }
                     }
                 }
+                /*[[[ итого за день, по остановкам и районам прибытия */
+                for (int k_stop = 0; k_stop < listStop.Count; k_stop++)
+                {
+                    excelSh.Cells[1, 1 + 20 * COUNT_HOUR].Value = "за день";
+                    excelSh.Cells[3+k_stop , 1 ].Value = k_stop+1;
+                    for (int j_dist = 0; j_dist < COUNT_DISTRICT; j_dist++)
+                    {
+                        excelSh.Cells[2, 2 + j_dist + 20 * COUNT_HOUR].Value = listDist[j_dist].NameDistrict;
+                        excelSh.Cells[2, 2 + COUNT_DISTRICT + j_dist + 20 * COUNT_HOUR].Value = listDist[j_dist].NameDistrict;
+                        int sumw = 0, sump = 0;
+                        for (int i_hour = 0; i_hour < COUNT_HOUR; i_hour++)
+                        {
+                            sumw+= matrCountPasWork[k_stop, i_hour, j_dist];
+                            sump+= matrCountPasPens[k_stop, i_hour, j_dist];
+                        }
+                        excelSh.Cells[3 + k_stop, 2 + j_dist + 20 * COUNT_HOUR].Value = sumw;
+                        excelSh.Cells[3 + k_stop, 2 + COUNT_DISTRICT + j_dist + 20 * COUNT_HOUR].Value = sump;
+                    }
+
+                    //for (int i_hour = 0; i_hour < COUNT_HOUR; i_hour++)
+                    //{
+                    //    excelSh.Cells[3 + k_stop, 2 + i_hour + 20 * (COUNT_HOUR+1)].Value = matrFlowPasWork[k_stop,i_hour];
+                    //    excelSh.Cells[3 + k_stop, 2 + COUNT_HOUR + i_hour + 20 * (COUNT_HOUR+1)].Value = matrFlowPasPens[k_stop, i_hour];
+                    //}
+                }
+                //for (int i_hour = 0; i_hour < COUNT_HOUR; i_hour++)
+                //{
+                //    excelSh.Cells[2, 2 + i_hour + 20 * (COUNT_HOUR + 1)].Value = i_hour+6;
+                //    excelSh.Cells[2, 2 + COUNT_HOUR + i_hour + 20 * (COUNT_HOUR + 1)].Value = 6+ i_hour;
+                //}
+                /*]]]*/
+
                 excelSh = package.Workbook.Worksheets.Add("trafic");
-                int sum = 0;
-                int global = 0;
+                //int sum = 0;
+                //int global = 0;
                 TimeSpan time_6 = new TimeSpan(6,0,0);
                 for (int i_stop = 0; i_stop < listStop.Count(); i_stop++)
                 {
@@ -517,15 +553,25 @@ namespace Транспорт2017.ГенераторПас
                     excelSh.Cells[4, 1 + 5 * i_stop].Value = "Время";
                     excelSh.Cells[4, 2 + 5 * i_stop].Value = "Р-н прибытия";
                     excelSh.Cells[4, 3 + 5 * i_stop].Value = "Код ост прибытия";
-                    global = global + listPass.Where(x => x.CodeStopStart == i_stop).Count();
-                    for (int j = sum; j < global; j++)
+                    //global = global + listPass.Where(x => x.CodeStopStart == i_stop).Count();
+                    //for (int j = sum; j < global; j++)
+                    //{
+                    //    //string ghg = Convert.ToString(listPass[j].Time.ToString("H:mm"));
+                    //    excelSh.Cells[5 + j - sum, 1 + 5 * i_stop].Value = (listPass[j].Time - time_6).TotalMinutes;
+                    //    excelSh.Cells[5 + j - sum, 2 + 5 * i_stop].Value = listPass[j].CodeDistrictFinish + 1;
+                    //    excelSh.Cells[5 + j - sum, 3 + 5 * i_stop].Value = listPass[j].CodeStopFinish + 1;
+                    //}
+                    //sum = global;
+                    List<Passenger> list = listPass.Where(x => x.CodeStopStart == i_stop).ToList();
+                    list.Sort();
+                    int i_pas = 0;
+                    foreach (Passenger pass in list)
                     {
-                        //string ghg = Convert.ToString(listPass[j].Time.ToString("H:mm"));
-                        excelSh.Cells[5 + j - sum, 1 + 5 * i_stop].Value = (listPass[j].Time - time_6).TotalMinutes;
-                        excelSh.Cells[5 + j - sum, 2 + 5 * i_stop].Value = listPass[j].CodeDistrictFinish + 1;
-                        excelSh.Cells[5 + j - sum, 3 + 5 * i_stop].Value = listPass[j].CodeStopFinish + 1;
+                        excelSh.Cells[5 + i_pas, 1 + 5 * i_stop].Value = (pass.Time - time_6).TotalMinutes;
+                        excelSh.Cells[5 + i_pas, 2 + 5 * i_stop].Value = pass.CodeDistrictFinish + 1;
+                        excelSh.Cells[5 + i_pas, 3 + 5 * i_stop].Value = pass.CodeStopFinish + 1;
+                        i_pas++;
                     }
-                    sum = global;
                 }
                 package.Save();
             }
