@@ -178,6 +178,8 @@ namespace Транспорт2017.ГенераторПас
             double[,] k_flow_pensioners_evening = new double[COUNT_DISTRICT, COUNT_DISTRICT];
             double[] hour_region_workers = new double[COUNT_DISTRICT];
             double[] hour_region_pensioners = new double[COUNT_DISTRICT];
+            double[] day_region_workers = new double[COUNT_DISTRICT];
+            double[] day_region_pensioners = new double[COUNT_DISTRICT];
             double[] past_work = new double[COUNT_DISTRICT]; // прошлое значение работающих не остановке
             double[] past_pens = new double[COUNT_DISTRICT]; // прошлое значение пенсионеров не остановке
             double[] actual_work = new double[COUNT_DISTRICT];
@@ -195,6 +197,9 @@ namespace Транспорт2017.ГенераторПас
                     {
                         hour_region_workers[i_region] = listDist[i_region].CountWork * probability_use_pub_trans * (1 - probability_use_taxi) * count_work_trip * timeDist[i_region, n_hour]; // общее число работников в районах на текущий час
                         hour_region_pensioners[i_region] = listDist[i_region].CountPens * probability_use_pub_trans * (1 - probability_use_taxi) * count_pens_trip * timeDist[i_region, n_hour]; // общее число пенсионеров в районах на текущий час
+                        day_region_workers[i_region] = hour_region_workers[i_region] / timeDist[i_region, n_hour]; // общее число работников в районах за день
+                        day_region_pensioners[i_region] = hour_region_pensioners[i_region] / timeDist[i_region, n_hour];// общее число пенсионеров в районах за день
+
                     }
                     //коэффициенты перераспределения потоков между районами     
                     else
@@ -267,8 +272,8 @@ namespace Транспорт2017.ГенераторПас
                     }
                     if (n_hour == 0)
                     {
-                        past_work[i_region] = listDist[i_region].CountWork;
-                        past_pens[i_region] = listDist[i_region].CountPens;
+                        past_work[i_region] = day_region_workers[i_region];
+                        past_pens[i_region] = day_region_pensioners[i_region];
                         actual_work[i_region] = past_work[i_region] + flow_into_region_workers - flow_from_region_workers;
                         actual_pens[i_region] = past_pens[i_region] + flow_into_region_pensioners - flow_from_region_pensioners;
                     }
@@ -603,7 +608,7 @@ namespace Транспорт2017.ГенераторПас
         }
         public static void SaveToSheets_test(List<Passenger> listPass)
         {
-            FileStream file = File.Create("данные\\2.xlsx");
+            FileStream file = File.Create("данные\\3.xlsx");
             //List<Passenger> listPass = DistributePass();
             using (ExcelPackage package = new ExcelPackage(file))
             {
