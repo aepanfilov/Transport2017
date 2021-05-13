@@ -196,7 +196,7 @@ namespace Транспорт2017.ГенераторПас
                         // общее число работников в районах на текущий час
                         hour_region_workers[i_region] = listDist[i_region].CountWork * probability_use_pub_trans * (1 - probability_use_taxi) * count_work_trip * timeDist[i_region, n_hour];
                         // общее число пенсионеров в районах на текущий час
-                        hour_region_pensioners[i_region] = listDist[i_region].CountPens * probability_use_pub_trans * (1 - probability_use_taxi) * count_pens_trip * timeDist[i_region, n_hour]; 
+                        hour_region_pensioners[i_region] = listDist[i_region].CountPens * (1 - probability_use_taxi) * count_pens_trip * timeDist[i_region, n_hour]; 
                         // общее число работников в районах за день
                         day_region_workers[i_region] = hour_region_workers[i_region] / timeDist[i_region, n_hour]; 
                         // общее число пенсионеров в районах за день
@@ -263,7 +263,7 @@ namespace Транспорт2017.ГенераторПас
                                 flow_into_region_workers +=  k_flow_workers_evening[i_region, j_region] / timeDist[j_region, n_hour];
                                 flow_into_region_pensioners += k_flow_pensioners_evening[i_region, j_region] / timeDist[j_region, n_hour];
                                 flow_from_region_workers += k_flow_workers_evening[j_region, i_region] / timeDist[j_region, n_hour] * listDist[j_region].CountStops;
-                                flow_from_region_pensioners +=  k_flow_pensioners_evening[j_region, i_region] / timeDist[j_region, n_hour] * listDist[j_region].CountStops;
+                                flow_from_region_pensioners += k_flow_pensioners_evening[j_region, i_region] / timeDist[j_region, n_hour] * listDist[j_region].CountStops;
                             }
                         }
                     }
@@ -301,8 +301,8 @@ namespace Транспорт2017.ГенераторПас
                     }
                     if (n_hour == 0)
                     {
-                        hour_region_workers[i_region] = actual_work[i_region] * timeDist[i_region, n_hour];
-                        hour_region_pensioners[i_region] = actual_pens[i_region] * timeDist[i_region, n_hour];
+                        hour_region_workers[i_region] = actual_work[i_region] * timeDist[i_region, n_hour + 1];
+                        hour_region_pensioners[i_region] = actual_pens[i_region] * timeDist[i_region, n_hour + 1];
                     }
                     //загрузка числа пассажиров, находящихся в районах по часам
                     ballWork[i_region, n_hour] = past_work[i_region];
@@ -567,7 +567,7 @@ namespace Транспорт2017.ГенераторПас
         }
         public static void SaveToSheets_test(List<Passenger> listPass)
         {
-            FileStream file = File.Create("данные\\3.xlsx");
+            FileStream file = File.Create("данные\\2.xlsx");
             //List<Passenger> listPass = DistributePass();
             using (ExcelPackage package = new ExcelPackage(file))
             {
