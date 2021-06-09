@@ -139,11 +139,10 @@
     <EmbeddedResource Include="UI_Forms\WaitForm.resx">
       <DependentUpon>WaitForm.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
     <None Include="Данные.zip" />
-    <None Include="данные\1.xlsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="данные\Source_data.xlsx" />
     <None Include="инструкция.docx" />
   </ItemGroup>
   <ItemGroup>

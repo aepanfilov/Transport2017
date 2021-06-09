@@ -1050,7 +1050,7 @@ namespace Транспорт2017
         {
             DateTime dt = DateTime.Now;
 
-            Calculate.LoadStopFromExcel();
+            Calculate.LoadFromExcel();
             DateTime dt2 = DateTime.Now;
 
             Calculate.GeneratePass();
@@ -1060,7 +1060,7 @@ namespace Транспорт2017
             Calculate.SaveToSheets_test(listPass);
             DateTime dt4 = DateTime.Now;
 
-            MessageBox.Show($"готово загрузка={(dt2-dt).TotalMilliseconds} просчёты={(dt3 - dt2).TotalMilliseconds} сохранение={(dt4 - dt3).TotalMilliseconds} всего={(dt4 - dt).TotalMilliseconds}");
+            MessageBox.Show($"Генерация прошла успешно:\n1) Загрузка с Excel = {(dt2-dt).TotalMilliseconds} мс\n2) Просчёты = {(dt3 - dt2).TotalMilliseconds} мс\n3) Сохранение в файл ={(dt4 - dt3).TotalMilliseconds } мс\nВсего потрачено времени = {(dt4 - dt).TotalMilliseconds} мс", "Генерация завершена");
         }
     }
 }
