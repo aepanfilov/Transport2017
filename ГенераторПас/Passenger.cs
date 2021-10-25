@@ -11,6 +11,7 @@ namespace Транспорт2017.ГенераторПас
         public TimeSpan Time { get; set; }
         public int CodeDistrictFinish { get; set; }
         public int CodeStopFinish { get; set; }
+        public int TypeOfPass { get; set; }
 
         public override string ToString()
         {

@@ -1048,19 +1048,21 @@ namespace Транспорт2017
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
-            DateTime dt = DateTime.Now;
+            //DateTime dt = DateTime.Now;
 
             Calculate.LoadFromExcel();
-            DateTime dt2 = DateTime.Now;
+            //DateTime dt2 = DateTime.Now;
 
             Calculate.GeneratePass();
             List<Passenger> listPass = Calculate.DistributePass();
-            DateTime dt3 = DateTime.Now;
+            //DateTime dt3 = DateTime.Now;
+
+            Calculate.Revers(listPass);
 
             Calculate.SaveToSheets_test(listPass);
-            DateTime dt4 = DateTime.Now;
+            //DateTime dt4 = DateTime.Now;
 
-            MessageBox.Show($"Генерация прошла успешно:\n1) Загрузка с Excel = {(dt2-dt).TotalMilliseconds} мс\n2) Просчёты = {(dt3 - dt2).TotalMilliseconds} мс\n3) Сохранение в файл ={(dt4 - dt3).TotalMilliseconds } мс\nВсего потрачено времени = {(dt4 - dt).TotalMilliseconds} мс", "Генерация завершена");
+            //MessageBox.Show($"Генерация прошла успешно:\n1) Загрузка с Excel = {(dt2-dt).TotalMilliseconds} мс\n2) Просчёты = {(dt3 - dt2).TotalMilliseconds} мс\n3) Сохранение в файл ={(dt4 - dt3).TotalMilliseconds } мс\nВсего потрачено времени = {(dt4 - dt).TotalMilliseconds} мс", "Генерация завершена");
         }
     }
 }
