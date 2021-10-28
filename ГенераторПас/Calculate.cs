@@ -12,7 +12,7 @@ namespace Транспорт2017.ГенераторПас
         const int COUNT_DISTRICT = 8; // размерность матрицы
         const int COUNT_HOUR = 15; // размерность матрицы доли пассажиров, отъезжающих от остановки, в зависимости от времени прибытия
         const int FIRST_HOUR = 6; // Час начала работы ТС
-        const int END_DAYTIME = 9; // Час окончания дневного периода
+        const int END_DAYTIME = 10; // Час окончания дневного периода
         const int START_EVENTIME = 10;
         const int TYPE_PASS = 4; // Школьники - 0, Студенты - 1, Рабочие - 2, Пенсионеры - 3
         const int COUNT_OST = 446;
@@ -41,8 +41,10 @@ namespace Транспорт2017.ГенераторПас
         static int[,] matrCorr;
         static int[,] matrCorrWork;
         static int[,] matrCorrPens;
-        static int[,] matrEvenWork;
-        static int[,] matrEvenPens;
+        static int[] matrEvenDistWork;
+        static int[] matrEvenDistPens;
+        static double[,] matrEvenTimeDistWork;
+        static double[,] matrEvenTimeDistPens;
         static int[,] matrEvenCorrWork;
         static int[,] matrEvenCorrPens;
 
@@ -727,11 +729,20 @@ namespace Транспорт2017.ГенераторПас
                 {
                     raznpassWork = matrCorrWork[i_matr, j_matr] - matrCorrWork[j_matr, i_matr];
                     if (raznpassWork > 0)
+                    {
                         matrEvenCorrWork[i_matr, j_matr] = raznpassWork;
+                        matrEvenCorrWork[j_matr, i_matr] = 0;
+                    }
                     else if (raznpassWork < 0)
+                    {
                         matrEvenCorrWork[j_matr, i_matr] = Math.Abs(raznpassWork);
-                    else
                         matrEvenCorrWork[i_matr, j_matr] = 0;
+                    }
+                    else
+                    {
+                        matrEvenCorrWork[i_matr, j_matr] = 0;
+                        matrEvenCorrWork[j_matr, i_matr] = 0;
+                    }
 
                     raznpassPens = matrCorrPens[i_matr, j_matr] - matrCorrPens[j_matr, i_matr];
                     if (raznpassPens > 0)
@@ -745,52 +756,142 @@ namespace Транспорт2017.ГенераторПас
             //создаем список пассажиров и генерируем случайное время
             //int nom_ost_otpr;
             //int nom_ost_prib;
-            matrEvenWork = new int[COUNT_OST, COUNT_OST];
-            matrEvenPens = new int[COUNT_OST, COUNT_OST];
-            string nom_dist_otpr;
+            matrEvenDistWork = new int[COUNT_DISTRICT];
+            matrEvenDistPens = new int[COUNT_DISTRICT];
+            matrEvenTimeDistWork = new double[COUNT_DISTRICT,COUNT_HOUR];
+            matrEvenTimeDistPens = new double[COUNT_DISTRICT,COUNT_HOUR];
+            string name_dist_otpr;
             string name_dist_prib;
+            int nom_dist_otpr;
             int nom_dist_prib;
             int n_hour;
             int n_min;
+            int n_pass_hour;
             int CodeDistrictFinish;
 
             for (int i_matrEv = 0; i_matrEv < listStop.Count(); i_matrEv++)
             {
+                //создадим массив перемещений из районов
                 for (int j_matrEv = 0; j_matrEv < listStop.Count(); j_matrEv++)
                 {
+                    //рабочих
                     if (matrEvenCorrWork[i_matrEv, j_matrEv] != 0)
                     {
-                        //nom_ost_otpr = i_matrEv;
-                        //nom_ost_prib = j_matrEv;
-                        nom_dist_otpr = listStop[i_matrEv].District;
-                        name_dist_prib = listStop[j_matrEv].District;
-                        n_hour = rand.Next(START_EVENTIME, COUNT_HOUR);
-                        n_min = rand.Next(0, 60);
-                        //TimeSpan TimeS = new TimeSpan(FIRST_HOUR + i_hour, minutes, 0);
-                        TimeSpan TimeEv = new TimeSpan(FIRST_HOUR + n_hour, n_min, 0); // задаётся случайное время
-                        nom_dist_prib = region(name_dist_prib);
-                        listPass.Add(new Passenger { CodeStopStart = i_matrEv, Time = TimeEv, CodeDistrictFinish = nom_dist_prib, CodeStopFinish = j_matrEv, TypeOfPass = 1 });
-                        matrCountPasWork[i_matrEv, n_hour, nom_dist_prib] = matrCountPasWork[i_matrEv, n_hour, nom_dist_prib] + 1;
-                        matrEvenCorrWork[i_matrEv, j_matrEv] = matrEvenCorrWork[i_matrEv, j_matrEv] - 1;
+                        name_dist_otpr = listStop[i_matrEv].District;
+                        nom_dist_otpr = region(name_dist_otpr);
+                        matrEvenDistWork[nom_dist_otpr] = matrEvenDistWork[nom_dist_otpr] + 1;
                     }
+                    //пенсионеров
                     if (matrEvenCorrPens[i_matrEv, j_matrEv] != 0)
                     {
-                        //nom_ost_otpr = i_matrEv;
-                        //nom_ost_prib = j_matrEv;
-                        nom_dist_otpr = listStop[i_matrEv].District;
-                        name_dist_prib = listStop[j_matrEv].District;
-                        n_hour = rand.Next(START_EVENTIME, COUNT_HOUR);
-                        n_min = rand.Next(0, 60);
-                        TimeSpan TimeEv = new TimeSpan(FIRST_HOUR + n_hour, n_min, 0); // задаётся случайное время
-                        nom_dist_prib = region(name_dist_prib);
-                        listPass.Add(new Passenger { CodeStopStart = i_matrEv, Time = TimeEv, CodeDistrictFinish = nom_dist_prib, CodeStopFinish = j_matrEv, TypeOfPass = 2 });
-                        matrCountPasPens[i_matrEv, n_hour, nom_dist_prib] = matrCountPasPens[i_matrEv, n_hour, nom_dist_prib] + 1;
-                        matrEvenCorrPens[i_matrEv, j_matrEv] = matrEvenCorrPens[i_matrEv, j_matrEv] - 1;
+                        name_dist_otpr = listStop[i_matrEv].District;
+                        nom_dist_otpr = region(name_dist_otpr);
+                        matrEvenDistPens[nom_dist_otpr] = matrEvenDistPens[nom_dist_otpr] + 1;
                     }
-                    //else
-
                 }
             }
+            //умножим полученные массивы на матрицу коэффициентов по времени (чтобы распределить потоки пассажиров по часам в соответствии с пиком вечерних корреспонденций
+            for (int i_matrEvDist = 0; i_matrEvDist < COUNT_DISTRICT; i_matrEvDist++)
+            {
+                for (int n_hour_EvTime = START_EVENTIME; n_hour_EvTime < COUNT_HOUR; n_hour_EvTime++)
+                {
+                    matrEvenTimeDistWork[i_matrEvDist, n_hour_EvTime] = matrEvenDistWork[i_matrEvDist] * timeDist[i_matrEvDist, n_hour_EvTime]; //матрица количества пассажиров, отправляющихся от остановок района за указанный час
+                    matrEvenTimeDistPens[i_matrEvDist, n_hour_EvTime] = matrEvenDistPens[i_matrEvDist] * timeDist[i_matrEvDist, n_hour_EvTime];
+                }
+            }
+            for (int n_dist_Ev = 0; n_dist_Ev < COUNT_DISTRICT; n_dist_Ev++)
+            {                
+                for (int n_hour_Ev = START_EVENTIME; n_hour_Ev < COUNT_HOUR; n_hour_Ev++)
+                {
+                    if (matrEvenTimeDistWork[n_dist_Ev, n_hour_Ev] != 0)
+                    {
+                        for (int i_matrEv = 0; i_matrEv < listStop.Count(); i_matrEv++)
+                        {
+                            //создадим массив перемещений из районов
+                            for (int j_matrEv = 0; j_matrEv < listStop.Count(); j_matrEv++)
+                            {
+                                if (matrEvenCorrWork[i_matrEv, j_matrEv] != 0)
+                                {
+                                    name_dist_prib = listStop[j_matrEv].District;
+                                    n_min = rand.Next(0, 60);
+                                    TimeSpan TimeEv = new TimeSpan(n_hour_Ev, n_min, 0); // задаётся время
+                                    nom_dist_prib = region(name_dist_prib);
+                                    listPass.Add(new Passenger { CodeStopStart = i_matrEv, Time = TimeEv, CodeDistrictFinish = nom_dist_prib, CodeStopFinish = j_matrEv, TypeOfPass = 1 });
+                                    matrCountPasWork[i_matrEv, n_hour_Ev, nom_dist_prib] = matrCountPasWork[i_matrEv, n_hour_Ev, nom_dist_prib] + 1;
+                                    matrEvenCorrWork[i_matrEv, j_matrEv] = matrEvenCorrWork[i_matrEv, j_matrEv] - 1;
+                                    matrEvenTimeDistWork[n_dist_Ev, n_hour_Ev] = matrEvenTimeDistWork[n_dist_Ev, n_hour_Ev] - 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            for (int n_dist_Ev = 0; n_dist_Ev < COUNT_DISTRICT; n_dist_Ev++)
+            {
+                for (int n_hour_Ev = START_EVENTIME; n_hour_Ev < COUNT_HOUR; n_hour_Ev++)
+                {
+                    if (matrEvenTimeDistPens[n_dist_Ev, n_hour_Ev] != 0)
+                    {
+                        for (int i_matrEv = 0; i_matrEv < listStop.Count(); i_matrEv++)
+                        {
+                            //создадим массив перемещений из районов
+                            for (int j_matrEv = 0; j_matrEv < listStop.Count(); j_matrEv++)
+                            {
+                                if (matrEvenCorrPens[i_matrEv, j_matrEv] != 0)
+                                {
+                                    name_dist_prib = listStop[j_matrEv].District;
+                                    n_min = rand.Next(0, 60);
+                                    TimeSpan TimeEv = new TimeSpan(n_hour_Ev, n_min, 0); // задаётся время
+                                    nom_dist_prib = region(name_dist_prib);
+                                    listPass.Add(new Passenger { CodeStopStart = i_matrEv, Time = TimeEv, CodeDistrictFinish = nom_dist_prib, CodeStopFinish = j_matrEv, TypeOfPass = 1 });
+                                    matrCountPasPens[i_matrEv, n_hour_Ev, nom_dist_prib] = matrCountPasPens[i_matrEv, n_hour_Ev, nom_dist_prib] + 1;
+                                    matrEvenCorrPens[i_matrEv, j_matrEv] = matrEvenCorrPens[i_matrEv, j_matrEv] - 1;
+                                    matrEvenTimeDistPens[n_dist_Ev, n_hour_Ev] = matrEvenTimeDistPens[n_dist_Ev, n_hour_Ev] - 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            //генерируем минуты и дополняем список перемещений пассажиров
+            //for (n_hour = START_EVENTIME; n_hour < COUNT_HOUR; n_hour++)
+                //{      
+                    //if (matrEvenCorrWork[i_matrEv, j_matrEv] != 0)
+                        //{
+
+                        //    //nom_ost_otpr = i_matrEv;
+                        //    //nom_ost_prib = j_matrEv;
+                        //    nom_dist_otpr = listStop[i_matrEv].District;
+                        //    name_dist_prib = listStop[j_matrEv].District;
+                        //    //n_hour = rand.Next(START_EVENTIME, COUNT_HOUR);
+                        //    n_min = rand.Next(0, 60);
+                        //    //TimeSpan TimeS = new TimeSpan(FIRST_HOUR + i_hour, minutes, 0);
+                        //    TimeSpan TimeEv = new TimeSpan(FIRST_HOUR + n_hour, n_min, 0); // задаётся случайное время
+                        //    nom_dist_prib = region(name_dist_prib);
+                        //    listPass.Add(new Passenger { CodeStopStart = i_matrEv, Time = TimeEv, CodeDistrictFinish = nom_dist_prib, CodeStopFinish = j_matrEv, TypeOfPass = 1 });
+                        //    matrCountPasWork[i_matrEv, n_hour, nom_dist_prib] = matrCountPasWork[i_matrEv, n_hour, nom_dist_prib] + 1;
+                        //    matrEvenCorrWork[i_matrEv, j_matrEv] = matrEvenCorrWork[i_matrEv, j_matrEv] - 1;
+                        //}
+                        //    if (matrEvenCorrPens[i_matrEv, j_matrEv] != 0)
+                        //    {
+                        //        //nom_ost_otpr = i_matrEv;
+                        //        //nom_ost_prib = j_matrEv;
+                        //        nom_dist_otpr = listStop[i_matrEv].District;
+                        //        name_dist_prib = listStop[j_matrEv].District;
+                        //        n_hour = rand.Next(START_EVENTIME, COUNT_HOUR);
+                        //        n_min = rand.Next(0, 60);
+                        //        TimeSpan TimeEv = new TimeSpan(FIRST_HOUR + n_hour, n_min, 0); // задаётся случайное время
+                        //        nom_dist_prib = region(name_dist_prib);
+                        //        listPass.Add(new Passenger { CodeStopStart = i_matrEv, Time = TimeEv, CodeDistrictFinish = nom_dist_prib, CodeStopFinish = j_matrEv, TypeOfPass = 2 });
+                        //        matrCountPasPens[i_matrEv, n_hour, nom_dist_prib] = matrCountPasPens[i_matrEv, n_hour, nom_dist_prib] + 1;
+                        //        matrEvenCorrPens[i_matrEv, j_matrEv] = matrEvenCorrPens[i_matrEv, j_matrEv] - 1;
+                        //    }
+                        //}
+
+                        //else
+
+                    //}
+            
             //MessageBox.Show(summpass.ToString());
         }
         public static void SaveToSheets_test(List<Passenger> listPass) //получает на входе сгенерированный пассажиропоток
