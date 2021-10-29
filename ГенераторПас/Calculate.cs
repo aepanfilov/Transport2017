@@ -47,6 +47,9 @@ namespace Транспорт2017.ГенераторПас
         static double[,] matrEvenTimeDistPens;
         static int[,] matrEvenCorrWork;
         static int[,] matrEvenCorrPens;
+        static int[,] matrEvenCorrWorkTemp;
+        static int[,] matrEvenCorrPensTemp;
+        static double[] proc;
 
         public static int region(string name_region)
         {
@@ -534,7 +537,13 @@ namespace Транспорт2017.ГенераторПас
                                 int minutes = rand.Next(0, 60); // генерируются минуты
                                 TimeSpan TimeS = new TimeSpan(FIRST_HOUR + i_hour, minutes, 0); // задаётся случайное время
                                 int codeFinish_work = ChoiseOfStop(listStop[i_stop], j_region); // генерируется остановка назначения; вызов метода ChoiseOfStop();
-                                listPass.Add(new Passenger { CodeStopStart = i_stop, Time = TimeS, CodeDistrictFinish = j_region, CodeStopFinish = codeFinish_work, TypeOfPass = 1 }); // заполняется лист сгенерированных работающих пассажиров
+                                if (codeFinish_work != -2 && codeFinish_work < COUNT_OST - 1)
+                                    listPass.Add(new Passenger { CodeStopStart = i_stop, Time = TimeS, CodeDistrictFinish = j_region, CodeStopFinish = codeFinish_work, TypeOfPass = 1 }); // заполняется лист сгенерированных работающих пассажиров
+                                else
+                                {
+                                    codeFinish_work = ChoiseOfStop(listStop[i_stop], j_region);
+                                    n_passengers_work = n_passengers_work - 1;
+                                }
                             }
                         }
                         if (n_passengers_region_pens > 0)
@@ -544,7 +553,13 @@ namespace Транспорт2017.ГенераторПас
                                 int minutes = rand.Next(0, 60); // генерируются минуты
                                 TimeSpan TimeS = new TimeSpan(FIRST_HOUR + i_hour, minutes, 0); // задаётся случайное время
                                 int codeFinish_pens = ChoiseOfStop(listStop[i_stop], j_region); // генерируется остановка назначения; вызов метода ChoiseOfStop();
-                                listPass.Add(new Passenger { CodeStopStart = i_stop, Time = TimeS, CodeDistrictFinish = j_region, CodeStopFinish = codeFinish_pens, TypeOfPass = 2 }); // заполняется лист сгенерированных пассажиров-пенсионеров
+                                if (codeFinish_pens != -2 && codeFinish_pens < COUNT_OST-1)
+                                    listPass.Add(new Passenger { CodeStopStart = i_stop, Time = TimeS, CodeDistrictFinish = j_region, CodeStopFinish = codeFinish_pens, TypeOfPass = 2 }); // заполняется лист сгенерированных пассажиров-пенсионеров
+                                else
+                                { 
+                                    codeFinish_pens = ChoiseOfStop(listStop[i_stop], j_region);
+                                    n_passengers_pens = n_passengers_pens - 1;
+                                }
                             }
                         }
                     }
@@ -689,7 +704,9 @@ namespace Транспорт2017.ГенераторПас
             matrCorr = new int[COUNT_OST, COUNT_OST];
             matrCorrWork = new int[COUNT_OST, COUNT_OST];
             matrCorrPens = new int[COUNT_OST, COUNT_OST];
-            
+            matrEvenCorrWorkTemp = new int[COUNT_OST, COUNT_OST];
+            matrEvenCorrPensTemp = new int[COUNT_OST, COUNT_OST];
+
             for (int i_stop = 0; i_stop < listStop.Count(); i_stop++)
             {
                 otpr = i_stop;
@@ -702,6 +719,7 @@ namespace Транспорт2017.ГенераторПас
                     if (prib != -2) //ОБРАБОТАТЬ -2
                     {
                         matrCorrWork[otpr, prib] += 1;
+                        matrEvenCorrWorkTemp[otpr, prib] += 1;
                         matrCorr[otpr, prib] += 1;
                     }
                 }
@@ -713,6 +731,7 @@ namespace Транспорт2017.ГенераторПас
                     if (prib != -2)
                     {
                         matrCorrPens[otpr, prib] += 1;
+                        matrEvenCorrPensTemp[otpr, prib] += 1;
                         matrCorr[otpr, prib] += 1;
                     }
                 }
@@ -721,45 +740,106 @@ namespace Транспорт2017.ГенераторПас
             //Находим разницу количества работающих пассажиров, поехавших с остановки А до становки В и обратно
             matrEvenCorrWork = new int[COUNT_OST, COUNT_OST];
             matrEvenCorrPens = new int[COUNT_OST, COUNT_OST];
+            
             int raznpassWork;
             int raznpassPens;
             for (int i_matr=0; i_matr < listStop.Count(); i_matr++)
             {                
                 for (int j_matr = 0; j_matr < listStop.Count(); j_matr++)
                 {
-                    raznpassWork = matrCorrWork[i_matr, j_matr] - matrCorrWork[j_matr, i_matr];
-                    if (raznpassWork > 0)
-                    {
-                        matrEvenCorrWork[i_matr, j_matr] = raznpassWork;
-                        matrEvenCorrWork[j_matr, i_matr] = 0;
-                    }
-                    else if (raznpassWork < 0)
-                    {
-                        matrEvenCorrWork[j_matr, i_matr] = Math.Abs(raznpassWork);
-                        matrEvenCorrWork[i_matr, j_matr] = 0;
-                    }
-                    else
-                    {
-                        matrEvenCorrWork[i_matr, j_matr] = 0;
-                        matrEvenCorrWork[j_matr, i_matr] = 0;
-                    }
+                    ////// 3 вариант - отзеркалим матрицу корр
+                    matrEvenCorrWork[i_matr, j_matr] = matrCorrWork[j_matr, i_matr];
+                    matrEvenCorrPens[i_matr, j_matr] = matrCorrPens[j_matr, i_matr];
+                    matrEvenCorrWorkTemp[i_matr, j_matr] = matrCorrWork[j_matr, i_matr];
+                    ////1 вариант - Как у ЕГ (в финальной м-це на 100т больше)
+                    //raznpassWork = matrCorrWork[i_matr, j_matr] - matrCorrWork[j_matr, i_matr];
+                    //if (raznpassWork > 0)
+                    //{
+                    //    matrEvenCorrWork[i_matr, j_matr] = matrEvenCorrWork[i_matr, j_matr] + raznpassWork;
+                    //}
+                    //else if (raznpassWork < 0)
+                    //{
+                    //    matrEvenCorrWork[j_matr, i_matr] = matrEvenCorrWork[j_matr, i_matr] + Math.Abs(raznpassWork);
+                    //}
+                    //else
+                    //{
+                    //    matrEvenCorrWork[i_matr, j_matr] = matrEvenCorrWork[i_matr, j_matr] + 0;
+                    //}
 
-                    raznpassPens = matrCorrPens[i_matr, j_matr] - matrCorrPens[j_matr, i_matr];
-                    if (raznpassPens > 0)
-                        matrEvenCorrPens[i_matr, j_matr] = raznpassPens;
-                    else if (raznpassPens < 0)
-                        matrEvenCorrPens[j_matr, i_matr] = Math.Abs(raznpassPens);
-                    else
-                        matrEvenCorrPens[i_matr, j_matr] = 0;
+                    //raznpassPens = matrCorrPens[i_matr, j_matr] - matrCorrPens[j_matr, i_matr];
+                    //if (raznpassPens > 0)
+                    //{
+                    //    matrEvenCorrPens[i_matr, j_matr] = matrEvenCorrPens[i_matr, j_matr] + raznpassPens;
+                    //}
+                    //else if (raznpassPens < 0)
+                    //{
+                    //    matrEvenCorrPens[j_matr, i_matr] = matrEvenCorrPens[j_matr, i_matr] + Math.Abs(raznpassPens);
+                    //}
+                    //else
+                    //{
+                    //    matrEvenCorrPens[i_matr, j_matr] = matrEvenCorrPens[j_matr, i_matr] + 0;
+                    //}
+                    ////2 вариант - В вечернее время едут только пассажиры, которые составляют разницу верхней и нихжей частей мартицы корр
+                    //raznpassWork = matrCorrWork[i_matr, j_matr] - matrCorrWork[j_matr, i_matr];
+                    //if (raznpassWork > 0)
+                    //{
+                    //    matrEvenCorrWork[i_matr, j_matr] = raznpassWork;
+                    //    matrEvenCorrWork[j_matr, i_matr] = 0;
+                    //    //matrEvenCorrWorkTemp[i_matr, j_matr] = raznpassWork;
+                    //    //matrEvenCorrWorkTemp[j_matr, i_matr] = 0;
+                    //}
+                    //else if (raznpassWork < 0)
+                    //{
+                    //    matrEvenCorrWork[j_matr, i_matr] = Math.Abs(raznpassWork);
+                    //    matrEvenCorrWork[i_matr, j_matr] = 0;
+                    //    //matrEvenCorrWorkTemp[j_matr, i_matr] = Math.Abs(raznpassWork);
+                    //    //matrEvenCorrWorkTemp[i_matr, j_matr] = 0;
+                    //}
+                    //else
+                    //{
+                    //    matrEvenCorrWork[i_matr, j_matr] = 0;
+                    //    matrEvenCorrWork[j_matr, i_matr] = 0;
+                    //    //matrEvenCorrWorkTemp[i_matr, j_matr] = 0;
+                    //    //matrEvenCorrWorkTemp[j_matr, i_matr] = 0;
+                    //}
+
+                    //raznpassPens = matrCorrPens[i_matr, j_matr] - matrCorrPens[j_matr, i_matr];
+                    //if (raznpassPens > 0)
+                    //{
+                    //    matrEvenCorrPens[i_matr, j_matr] = raznpassPens;
+                    //    matrEvenCorrPens[j_matr, i_matr] = 0;
+                    //}
+                    //else if (raznpassPens < 0)
+                    //{
+                    //    matrEvenCorrPens[j_matr, i_matr] = Math.Abs(raznpassPens);
+                    //    matrEvenCorrPens[i_matr, j_matr] = 0;
+                    //}
+                    //else
+                    //{
+                    //    matrEvenCorrPens[i_matr, j_matr] = 0;
+                    //    matrEvenCorrPens[j_matr, i_matr] = 0;
+                    //}
+
+
+
                 }
             }
-            //создаем список пассажиров и генерируем случайное время
-            //int nom_ost_otpr;
-            //int nom_ost_prib;
-            matrEvenDistWork = new int[COUNT_DISTRICT];
+            //for (int i_matr = 0; i_matr < listStop.Count(); i_matr++)
+            //{
+            //    for (int j_matr = 0; j_matr < listStop.Count(); j_matr++)
+            //    {
+            //        ////// 3 вариант - отзеркалим матрицу корр
+            //        matrEvenCorrWork[i_matr, j_matr] = matrEvenCorrWorkTemp[i_matr, j_matr];
+            //    }
+            //}
+                    //создаем список пассажиров и генерируем случайное время
+                    //int nom_ost_otpr;
+                    //int nom_ost_prib;
+                    matrEvenDistWork = new int[COUNT_DISTRICT];
             matrEvenDistPens = new int[COUNT_DISTRICT];
             matrEvenTimeDistWork = new double[COUNT_DISTRICT,COUNT_HOUR];
             matrEvenTimeDistPens = new double[COUNT_DISTRICT,COUNT_HOUR];
+            proc = new double[COUNT_DISTRICT];
             string name_dist_otpr;
             string name_dist_prib;
             int nom_dist_otpr;
@@ -779,31 +859,47 @@ namespace Транспорт2017.ГенераторПас
                     {
                         name_dist_otpr = listStop[i_matrEv].District;
                         nom_dist_otpr = region(name_dist_otpr);
-                        matrEvenDistWork[nom_dist_otpr] = matrEvenDistWork[nom_dist_otpr] + 1;
+                        matrEvenDistWork[nom_dist_otpr] = matrEvenDistWork[nom_dist_otpr] + matrEvenCorrWork[i_matrEv, j_matrEv];
+                        //matrEvenCorrWorkTemp[i_matrEv, j_matrEv] = matrEvenCorrWorkTemp[i_matrEv, j_matrEv] - 1;
                     }
                     //пенсионеров
                     if (matrEvenCorrPens[i_matrEv, j_matrEv] != 0)
                     {
                         name_dist_otpr = listStop[i_matrEv].District;
                         nom_dist_otpr = region(name_dist_otpr);
-                        matrEvenDistPens[nom_dist_otpr] = matrEvenDistPens[nom_dist_otpr] + 1;
+                        matrEvenDistPens[nom_dist_otpr] = matrEvenDistPens[nom_dist_otpr] + matrEvenCorrPens[i_matrEv, j_matrEv];
+                        //matrEvenCorrPensTemp[i_matrEv, j_matrEv] = matrEvenCorrPensTemp[i_matrEv, j_matrEv] - 1;
                     }
                 }
             }
+            
             //умножим полученные массивы на матрицу коэффициентов по времени (чтобы распределить потоки пассажиров по часам в соответствии с пиком вечерних корреспонденций
             for (int i_matrEvDist = 0; i_matrEvDist < COUNT_DISTRICT; i_matrEvDist++)
             {
                 for (int n_hour_EvTime = START_EVENTIME; n_hour_EvTime < COUNT_HOUR; n_hour_EvTime++)
-                {
-                    matrEvenTimeDistWork[i_matrEvDist, n_hour_EvTime] = matrEvenDistWork[i_matrEvDist] * timeDist[i_matrEvDist, n_hour_EvTime]; //матрица количества пассажиров, отправляющихся от остановок района за указанный час
-                    matrEvenTimeDistPens[i_matrEvDist, n_hour_EvTime] = matrEvenDistPens[i_matrEvDist] * timeDist[i_matrEvDist, n_hour_EvTime];
+                {                   
+                    proc[i_matrEvDist] = proc[i_matrEvDist] + timeDist[i_matrEvDist, n_hour_EvTime]; // матрица с процентом распределенных пассажиров по часам (введена из-за того, что терялись вечерние пассажиры при умножении на коэффициенты вечерних часов)
                 }
+            }
+            double A=0,B=0;
+            for (int i_matrEvDist = 0; i_matrEvDist < COUNT_DISTRICT; i_matrEvDist++)
+            {
+                for (int n_hour_EvTime = START_EVENTIME; n_hour_EvTime < COUNT_HOUR; n_hour_EvTime++)
+                {
+                    //matrEvenTimeDistWork[i_matrEvDist, n_hour_EvTime] = matrEvenDistWork[i_matrEvDist] * timeDist[i_matrEvDist, n_hour_EvTime]; //матрица количества пассажиров, отправляющихся от остановок района за указанный час
+                    //matrEvenTimeDistPens[i_matrEvDist, n_hour_EvTime] = matrEvenDistPens[i_matrEvDist] * timeDist[i_matrEvDist, n_hour_EvTime];
+                    matrEvenTimeDistWork[i_matrEvDist, n_hour_EvTime] = (matrEvenDistWork[i_matrEvDist] * timeDist[i_matrEvDist, n_hour_EvTime]) + ((matrEvenDistWork[i_matrEvDist] * (1 - proc[i_matrEvDist])) / 5); //матрица количества пассажиров, отправляющихся от остановок района за указанный час
+                    matrEvenTimeDistPens[i_matrEvDist, n_hour_EvTime] = (matrEvenDistPens[i_matrEvDist] * timeDist[i_matrEvDist, n_hour_EvTime]) + (matrEvenDistPens[i_matrEvDist] * (1 - proc[i_matrEvDist])) / 5;
+                    A = A + matrEvenTimeDistWork[i_matrEvDist, n_hour_EvTime] + matrEvenTimeDistPens[i_matrEvDist, n_hour_EvTime];
+                }
+
+                B = B + matrEvenDistWork[i_matrEvDist] + matrEvenDistPens[i_matrEvDist];
             }
             for (int n_dist_Ev = 0; n_dist_Ev < COUNT_DISTRICT; n_dist_Ev++)
             {                
                 for (int n_hour_Ev = START_EVENTIME; n_hour_Ev < COUNT_HOUR; n_hour_Ev++)
                 {
-                    if (matrEvenTimeDistWork[n_dist_Ev, n_hour_Ev] != 0)
+                    if (matrEvenTimeDistWork[n_dist_Ev, n_hour_Ev] > 0)
                     {
                         for (int i_matrEv = 0; i_matrEv < listStop.Count(); i_matrEv++)
                         {
@@ -830,7 +926,7 @@ namespace Транспорт2017.ГенераторПас
             {
                 for (int n_hour_Ev = START_EVENTIME; n_hour_Ev < COUNT_HOUR; n_hour_Ev++)
                 {
-                    if (matrEvenTimeDistPens[n_dist_Ev, n_hour_Ev] != 0)
+                    if (matrEvenTimeDistPens[n_dist_Ev, n_hour_Ev] > 0)
                     {
                         for (int i_matrEv = 0; i_matrEv < listStop.Count(); i_matrEv++)
                         {

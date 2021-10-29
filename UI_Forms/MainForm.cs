@@ -15,7 +15,7 @@ namespace Транспорт2017
 {
     public partial class MainForm : Form
     {
-        const string CORRPASFILENAME = "trafic.xlsx";
+        const string CORRPASFILENAME = "traffic.xlsx";
         const string TRAFTOROUTEFILENAME = "Расклад трафика по маршрутам.xlsx";
         const string MATRCORRFILENAME = "матрица корреспонденций.xlsx";
 
@@ -41,7 +41,7 @@ namespace Транспорт2017
                 //*** открыть книгу с трафиком пассажиров
                 FileInfo file2 = new FileInfo(SettingsModel.FileNameTrafic);
                 ExcelPackage packageTrafic = new ExcelPackage(file2);
-                ExcelWorksheet sheetTrafic = packageTrafic.Workbook.Worksheets[1];
+                ExcelWorksheet sheetTrafic = packageTrafic.Workbook.Worksheets[2];
                 //*** добавление данных по остановкам
                 Остановка[] masOsts = new Остановка[КолОстановок];
                 int[] masCodeOst = new int[КолОстановок];
@@ -325,7 +325,7 @@ namespace Транспорт2017
                 //*** создать файл для обработанного трафика пассажиров
                 FileStream file2 = new FileStream(Application.StartupPath + "\\" + CORRPASFILENAME, FileMode.Create);//c пересозданием файла
                 ExcelPackage packageTrafic = new ExcelPackage(file2);
-                ExcelWorksheet shTarget = packageTrafic.Workbook.Worksheets.Add("trafic");
+                ExcelWorksheet shTarget = packageTrafic.Workbook.Worksheets.Add("traffic");
                 //цикл по столбцам-остановкам обрабатываемой книги
 
                 StringBuilder sb = new StringBuilder();//---del
