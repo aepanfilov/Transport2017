@@ -573,11 +573,15 @@ namespace Транспорт2017.ГенераторПас
         {
             double shance = rand.NextDouble(); // шанс выбрать остановку случайно
             // вероятность выбора любой остановки
+            
             if (shance < probability_of_arbitrary_choise) // если случайное число будет меньше вероятности произвольного выбора остановки, то задаётся случайная остановка назначения из списка остановок
-            {
+            {                
                 int ost;
                 ost = (int)(rand.NextDouble() * listStop.Count) + 1;
-                return ost;
+                if (ost != stopStart.CodeStop)
+                    return ost;
+                else
+                    return -2;
             }
             // вероятность выбора остановки в заданном районе
             else
@@ -709,30 +713,29 @@ namespace Транспорт2017.ГенераторПас
 
             for (int i_stop = 0; i_stop < listStop.Count(); i_stop++)
             {
-                otpr = i_stop;
-                List<Passenger> list = listPass.Where(x => x.CodeStopStart == i_stop).ToList();
-                //для работающих
-                foreach (Passenger pass in list.Where(x=> x.TypeOfPass == 1)) // для каждого пассажира из списка пассажиров
-                {                  
-                    prib = pass.CodeStopFinish;
-                    summpass += 1;
-                    if (prib != -2) //ОБРАБОТАТЬ -2
-                    {
-                        matrCorrWork[otpr, prib] += 1;
-                        matrEvenCorrWorkTemp[otpr, prib] += 1;
-                        matrCorr[otpr, prib] += 1;
-                    }
-                }
-                //для пенсионеров
-                foreach (Passenger pass in list.Where(x => x.TypeOfPass == 2)) // для каждого пассажира из списка пассажиров
+                //otpr = i_stop;
+                //List<Passenger> list = listPass.Where(x => x.CodeStopStart == i_stop).ToList();
+                foreach (Passenger pass in listPass.Where(x => x.CodeStopStart == i_stop)) // для каждого пассажира из списка пассажиров
                 {
-                    prib = pass.CodeStopFinish;
-                    summpass += 1;
-                    if (prib != -2)
+                    //для работающих
+                    if (pass.TypeOfPass == 1) // для каждого пассажира из списка пассажиров
                     {
-                        matrCorrPens[otpr, prib] += 1;
-                        matrEvenCorrPensTemp[otpr, prib] += 1;
-                        matrCorr[otpr, prib] += 1;
+                       
+                        matrCorrWork[i_stop, pass.CodeStopFinish] += 1;
+                        //matrEvenCorrWorkTemp[otpr, prib] += 1; // не для вар 3
+                        matrCorr[i_stop, pass.CodeStopFinish] += 1;
+
+                    }
+                    //для пенсионеров
+                    if (pass.TypeOfPass == 2)
+                    {
+                        prib = pass.CodeStopFinish;
+                        summpass += 1;
+
+                        matrCorrPens[i_stop, pass.CodeStopFinish] += 1;
+                        //matrEvenCorrPensTemp[otpr, prib] += 1;  // не для вар 3
+                        matrCorr[i_stop, pass.CodeStopFinish] += 1;
+
                     }
                 }
             }
@@ -1052,6 +1055,46 @@ namespace Транспорт2017.ГенераторПас
                         i_pas++;                        
                     }
                 }
+
+                excelSh = package.Workbook.Worksheets.Add("matr_morn_day"); // добавления листа для записи матрицы "утро-день"
+                
+                // Форматирование пассажиропотока               
+                for (int i_ost = 0; i_ost < listStop.Count(); i_ost++)
+                {
+                    for (int j_ost = 0; j_ost < listStop.Count(); j_ost++)
+                    {
+                    excelSh.Cells[i_ost+1, j_ost+1].Value = matrCorr[i_ost, j_ost];                        
+                    }
+                }
+
+                excelSh = package.Workbook.Worksheets.Add("matr_even");
+                for (int i_ost = 0; i_ost < listStop.Count(); i_ost++)
+                {
+                    for (int j_ost = 0; j_ost < listStop.Count(); j_ost++)
+                    {                       
+                        excelSh.Cells[i_ost+1, j_ost+1].Value = matrEvenCorrWork[i_ost, j_ost];
+                    }
+                }
+                int i_passs = 0;
+                excelSh = package.Workbook.Worksheets.Add("listpass"); // добавления листа для записи матрицы "утро-день"     
+                                    //List<Passenger> list = listPass.Where(x => x.CodeStopStart == i_pass).ToList();
+                    
+                    
+                    foreach (Passenger pass in listPass) // для каждого пассажира из списка пассажиров
+                    {
+                        excelSh.Cells[5 + i_passs, 1].Value = (pass.CodeStopStart);
+                        excelSh.Cells[5 + i_passs, 2].Value = (pass.CodeDistrictFinish);
+                        excelSh.Cells[5 + i_passs, 3].Value = (pass.CodeStopFinish);
+                        i_passs++;
+                    }
+                
+                //for (int i_pass = 0; i_pass < listPass.Count(); i_pass++)
+                //{
+
+                //        excelSh.Cells[i_pass + 1, 1].Value = listPass.codCodeDistrictFinish;
+
+                //}
+
                 package.Save(); // сохранить файл
             }
             file.Close();
