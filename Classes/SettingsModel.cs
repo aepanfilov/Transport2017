@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using System.Xml;
 
 namespace Транспорт2017
@@ -101,7 +97,7 @@ namespace Транспорт2017
             if (elem.GetElementsByTagName("ВероятностьПродолженияПоездки").Count != 0)
                 ВероятностьПродолженияПоездки = double.Parse(elem.GetElementsByTagName("ВероятностьПродолженияПоездки")[0].InnerText);
             if (elem.GetElementsByTagName("ПасажировВОтчет").Count != 0)
-                ПасажировВОтчет = bool.Parse(elem.GetElementsByTagName("ПасажировВОтчет")[0].InnerText); 
+                ПасажировВОтчет = bool.Parse(elem.GetElementsByTagName("ПасажировВОтчет")[0].InnerText);
             return true;
         }
     }

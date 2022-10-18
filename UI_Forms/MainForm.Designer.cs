@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.TabPage5 = new System.Windows.Forms.TabPage();
             this.openRes_button = new System.Windows.Forms.Button();
             this.listBox1 = new System.Windows.Forms.ListBox();
@@ -37,17 +36,12 @@
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.allSolve_toolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.load_toolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.solve_toolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.report_toolStripButton = new System.Windows.Forms.ToolStripButton();
             this.settings_toolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSplitButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.matrCorr_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trafPas_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.structMarsh_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.TabPage5.SuspendLayout();
             this.TabControl1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -108,16 +102,11 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton2,
-            this.allSolve_toolStripButton,
             this.toolStripSeparator1,
-            this.load_toolStripButton,
-            this.solve_toolStripButton,
-            this.report_toolStripButton,
+            this.allSolve_toolStripButton,
             this.settings_toolStripButton,
             this.toolStripSeparator3,
-            this.toolStripSplitButton1,
-            this.toolStripSeparator2,
-            this.toolStripButton1});
+            this.toolStripSplitButton1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(823, 54);
@@ -149,39 +138,6 @@
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 54);
-            // 
-            // load_toolStripButton
-            // 
-            this.load_toolStripButton.Enabled = false;
-            this.load_toolStripButton.Image = global::Транспорт2017.Properties.Resources.Table_32;
-            this.load_toolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.load_toolStripButton.Name = "load_toolStripButton";
-            this.load_toolStripButton.Size = new System.Drawing.Size(98, 51);
-            this.load_toolStripButton.Text = "Загрузить из БД";
-            this.load_toolStripButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.load_toolStripButton.Click += new System.EventHandler(this.Load_toolStripButton_Click);
-            // 
-            // solve_toolStripButton
-            // 
-            this.solve_toolStripButton.Enabled = false;
-            this.solve_toolStripButton.Image = global::Транспорт2017.Properties.Resources.Flag2_Green;
-            this.solve_toolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.solve_toolStripButton.Name = "solve_toolStripButton";
-            this.solve_toolStripButton.Size = new System.Drawing.Size(48, 51);
-            this.solve_toolStripButton.Text = "Расчет";
-            this.solve_toolStripButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.solve_toolStripButton.Click += new System.EventHandler(this.Solve_toolStripButton_Click);
-            // 
-            // report_toolStripButton
-            // 
-            this.report_toolStripButton.Enabled = false;
-            this.report_toolStripButton.Image = global::Транспорт2017.Properties.Resources.paper_text_pencil;
-            this.report_toolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.report_toolStripButton.Name = "report_toolStripButton";
-            this.report_toolStripButton.Size = new System.Drawing.Size(82, 51);
-            this.report_toolStripButton.Text = "Отчет в Excel";
-            this.report_toolStripButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.report_toolStripButton.Click += new System.EventHandler(this.Report_toolStripButton_Click);
             // 
             // settings_toolStripButton
             // 
@@ -238,21 +194,6 @@
             this.structMarsh_ToolStripMenuItem.Text = "Определить структуру всех маршрутов";
             this.structMarsh_ToolStripMenuItem.Click += new System.EventHandler(this.StructMarsh_ToolStripMenuItem_Click);
             // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 54);
-            // 
-            // toolStripButton1
-            // 
-            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
-            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(102, 51);
-            this.toolStripButton1.Text = "Тест троллейбус";
-            this.toolStripButton1.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.toolStripButton1.Click += new System.EventHandler(this.ToolStripButton1_Click_1);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -278,9 +219,6 @@
 
         internal System.Windows.Forms.TabPage TabPage5;
         internal System.Windows.Forms.TabControl TabControl1;
-        private System.Windows.Forms.ToolStripButton load_toolStripButton;
-        private System.Windows.Forms.ToolStripButton solve_toolStripButton;
-        private System.Windows.Forms.ToolStripButton report_toolStripButton;
         private System.Windows.Forms.ToolStripButton settings_toolStripButton;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ListBox listBox1;
@@ -292,8 +230,6 @@
         private System.Windows.Forms.ToolStripMenuItem matrCorr_ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem trafPas_ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem structMarsh_ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripButton toolStripButton1;
         private System.Windows.Forms.ToolStripButton toolStripButton2;
     }
 }

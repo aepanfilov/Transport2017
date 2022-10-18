@@ -2,13 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using Транспорт2017.ГенераторПас;
 
 namespace Транспорт2017
@@ -41,7 +39,7 @@ namespace Транспорт2017
                 //*** открыть книгу с трафиком пассажиров
                 FileInfo file2 = new FileInfo(SettingsModel.FileNameTrafic);
                 ExcelPackage packageTrafic = new ExcelPackage(file2);
-                ExcelWorksheet sheetTrafic = packageTrafic.Workbook.Worksheets[2];
+                ExcelWorksheet sheetTrafic = packageTrafic.Workbook.Worksheets[1];
                 //*** добавление данных по остановкам
                 Остановка[] masOsts = new Остановка[КолОстановок];
                 int[] masCodeOst = new int[КолОстановок];
@@ -298,17 +296,9 @@ namespace Транспорт2017
             listBox1.Items.Add("Средняя дальность поездки в остановках = " + pkday.срДальностьПоездкиОст.ToString("N2"));
             listBox1.Items.Add("Выручка = " + pkday.Выручка.ToString("N0") + " руб");
         }
-        void ShowResultDay(string strResult)
+        private bool ProcessPassangersGeneration(string fileName, out string msg)//обработка файла с генерациями пассажиров
         {
-            listBox1.Items.Clear();
-            StringReader sr = new StringReader(strResult);
-            string str;
-            while(!string.IsNullOrEmpty(str=sr.ReadLine()))
-                listBox1.Items.Add(str);            
-        }
-        private bool ProcessPassangersGeneration(string fileName, out string errMsg)//обработка файла с генерациями пассажиров
-        {
-            errMsg = string.Empty;
+            msg = string.Empty;
             DateTime dt = DateTime.Now;
 
             //*** открыть файл modelХХ.xlsm
@@ -366,14 +356,14 @@ namespace Транспорт2017
                 }
                 packageTrafic.Save();
                 file2.Close();
-                errMsg = "Обработка файла с пассажирами произведена успешно (" + (DateTime.Now - dt).ToString() +
+                msg = "Обработка файла с пассажирами произведена успешно (" + (DateTime.Now - dt).ToString() +
                     ")\n Сохранено в файл \"" + CORRPASFILENAME + "\"";
             }
             return true;
         }
-        private bool РасчетВсехМаршрутов(string fileNamePas, string fileNameModel, out string errMsg)
+        private bool РасчетВсехМаршрутов(string fileNamePas, string fileNameModel, out string msg)
         {
-            errMsg = string.Empty;
+            msg = string.Empty;
             DateTime dt = DateTime.Now;
 
             //*** 1) сформировать маршруты
@@ -391,13 +381,13 @@ namespace Транспорт2017
                 int ostIn, ostOut, codeMarsh;
                 string keyStr;
                 ПассажирыПоМаршрутам ptr;
-                int col=0;
+                int col = 0;
                 //цикл по колонкам (миллионам) пассажиров
-                while(sheetTrafic.Cells[3, col*10+2].GetValue<int>()!=0)
+                while (sheetTrafic.Cells[3, col * 10 + 2].GetValue<int>() != 0)
                 {
                     for (int i = 3; true; i++)
                     {
-                        ostIn = sheetTrafic.Cells[i, col*10+2].GetValue<int>();
+                        ostIn = sheetTrafic.Cells[i, col * 10 + 2].GetValue<int>();
                         if (ostIn == 0)
                             break;
                         ostOut = sheetTrafic.Cells[i, col * 10 + 3].GetValue<int>();
@@ -510,7 +500,7 @@ namespace Транспорт2017
                     packageTarget.Save();
                 }
                 fileTarget.Close();
-                errMsg = "Обработка расклада трафика по маршрутом произведено успешно (" + (DateTime.Now - dt).ToString() +
+                msg = "Обработка расклада трафика по маршрутом произведено успешно (" + (DateTime.Now - dt).ToString() +
                     ")\n Сохранено в файл \"" + TRAFTOROUTEFILENAME + "\"";
             }
             return true;
@@ -523,29 +513,29 @@ namespace Транспорт2017
             for (int i = 0; i < dict.Count; i++)
             {
                 key = dict.ElementAt(i).Key;
-                Маршрут marsh = masMarsh[key-1];
+                Маршрут marsh = masMarsh[key - 1];
                 //проверка на тот же маршрут (прямой - обратный) !коды должны идти рядом
                 numMarsh = marsh.Название.Split(new char[] { ' ' }, 2)[0];
-                numMarsh2="";
-                if(key>1)
-                    numMarsh2 = masMarsh[key-2].Название.Split(new char[] { ' ' }, 2)[0];
-                if (numMarsh == numMarsh2 && dict.ContainsKey(key-1))
+                numMarsh2 = "";
+                if (key > 1)
+                    numMarsh2 = masMarsh[key - 2].Название.Split(new char[] { ' ' }, 2)[0];
+                if (numMarsh == numMarsh2 && dict.ContainsKey(key - 1))
                 {
                     //оставляем запись с меньшим кодом маршрута
-                    dict[key-1]+=dict[key]; 
+                    dict[key - 1] += dict[key];
                     dict.Remove(key);
                     i--;
                     continue;
                 }
                 if (key < masMarsh.Length)
-                    numMarsh2 = masMarsh[key ].Название.Split(new char[] { ' ' }, 2)[0];
+                    numMarsh2 = masMarsh[key].Название.Split(new char[] { ' ' }, 2)[0];
                 if (numMarsh == numMarsh2 && dict.ContainsKey(key + 1))
                 {
                     dict[key] += dict[key + 1];
                     dict.Remove(key + 1);
                 }
             }
-            
+
         }
         //сортировка массив ключей по убыванию кол перевезенных пас (максимальным элементом)
         private int[] SortKey(Dictionary<int, int> dict)
@@ -586,7 +576,7 @@ namespace Транспорт2017
                 return new МатрицаКорреспонденций(КолОстановок);
             }
         }
-        private bool MakeMatrixCorrespondents(ref МатрицаКорреспонденций МатрицаКорр, bool ПоВсемМаршрутам, string[] masNameOst, out string errMsg)
+        private bool MakeMatrixCorrespondents(ref МатрицаКорреспонденций МатрицаКорр, bool ПоВсемМаршрутам, string[] masNameOst, out string msg)
         {
             DateTime dt = DateTime.Now;
             //загрузка маршрутов
@@ -599,7 +589,7 @@ namespace Транспорт2017
             МатрицаКорр.СортироватьПути();
             //записать результаты
             SaveMC(МатрицаКорр, masNameOst);
-            errMsg = "Расчет матрицы достижимостей закончен (" + (DateTime.Now - dt).ToString() +
+            msg = "Расчет матрицы достижимостей закончен (" + (DateTime.Now - dt).ToString() +
                 ")\n Сохранено в файл \"" + MATRCORRFILENAME + "\"";
             return true;
         }
@@ -702,7 +692,6 @@ namespace Транспорт2017
             fileTarget.Close();
         }
 
-
         //
         public MainForm()
         {
@@ -713,36 +702,9 @@ namespace Транспорт2017
             coord = new Кординатор();
             //progressForm = new ProgressForm();
             waitForm = new WaitForm();
-            solve_toolStripButton.Enabled = false;
-            report_toolStripButton.Enabled = false;
+            //solve_toolStripButton.Enabled = false;
+            //report_toolStripButton.Enabled = false;
             openRes_button.Enabled = false;
-        }
-        private void Load_toolStripButton_Click(object sender, EventArgs e)
-        {
-            DateTime dt = DateTime.Now;
-            string errMsg;
-            if (!LoadDataToCoordinator(out errMsg))
-                MessageBox.Show(errMsg, "Ошибка разбора трафика", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            coord.колЧасовРаботы = SettingsModel.КолЧасовМоделирования;
-            Остановка.МАКСВремяОжиданияПасДоУхода = SettingsModel.МаксВремяОжидания;
-            Остановка.ВЕРОЯТНОСТЬПродолженияПоездки = SettingsModel.ВероятностьПродолженияПоездки;
-
-            solve_toolStripButton.Enabled = true;
-            MessageBox.Show("База параметров модели загружена успешно (" + (DateTime.Now - dt).ToString() + ")");
-        }
-        private void Solve_toolStripButton_Click(object sender, EventArgs e)
-        {
-            coord.колЧасовРаботы = SettingsModel.КолЧасовМоделирования;
-            //model_DoWork(null, null);
-            //return;
-
-            waitForm.IsNumericProgressBar = true;
-            waitForm.SetMaxValue(coord.колЧасовРаботы * 60);
-            waitForm.Text = "Идет процесс расчета модели...";
-            waitForm.backgroundWorker1.DoWork += Model_DoWork;
-            waitForm.backgroundWorker1.RunWorkerCompleted += Model_RunWorkerCompleted;
-            waitForm.backgroundWorker1.RunWorkerAsync(this);
-            waitForm.Show(this);
         }
         private void Model_DoWork(object sender, DoWorkEventArgs e)
         {
@@ -760,22 +722,7 @@ namespace Транспорт2017
         {
             if (!e.Cancelled && e.Error == null)
             {
-                //разбор результатов
-                //bgw.ReportProgress(coord.колЧасовРаботы * 60 - 1, "Вывод результатов моделирования...")
-                ////вывод результатов моделирования
-                //showResultPassangers()
-                ////progForm.Label1.Text = "Результаты по автобусам..."
-                //bgw.ReportProgress(coord.колЧасовРаботы * 60 - 1, "Вывод результатов по автобусам...")
-                //showResultAutos()
-                ////progForm.Label1.Text = "Результаты по маршрутам..."
-                //bgw.ReportProgress(coord.колЧасовРаботы * 60 - 1, "Вывод результатов по маршрутам...")
-                //showResultMarsh()
-                ////progForm.Label1.Text = "Результаты по остановкам..."
-                //bgw.ReportProgress(coord.колЧасовРаботы * 60 - 1, "Вывод результатов по остановкам...")
-                //showResultOst()
-
                 ShowResultDay(coord.показателиРаботы);
-                report_toolStripButton.Enabled = true;
             }
             else if (e.Error != null)
                 MessageBox.Show(e.Error.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -784,29 +731,6 @@ namespace Транспорт2017
             waitForm.backgroundWorker1.RunWorkerCompleted -= Model_RunWorkerCompleted;
             waitForm.Hide();
             MessageBox.Show("ok");
-        }
-        private void Report_toolStripButton_Click(object sender, EventArgs e)
-        {
-            string errMsg;
-            if (!coord.ЗаписьОтчетаВExcel(out errMsg))
-                MessageBox.Show(errMsg, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-        private void BackgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            //            //progForm.Label1.Text = "Идет подготовка к выводу результатов..."
-            ////progForm.Label1.Text = "Результаты по пассажирам..."
-            ////вывод результатов моделирования
-            //showResultPassangers()
-            ////progForm.Label1.Text = "Результаты по автобусам..."
-            //showResultAutos()
-            ////progForm.Label1.Text = "Результаты по маршрутам..."
-            //showResultMarsh()
-            ////progForm.Label1.Text = "Результаты по остановкам..."
-            //showResultOst()
-            //UseWaitCursor = False
-            //progForm.Hide()
-            //ОтчетВExcelToolStripMenuItem.Enabled = true
-            //MessageBox.Show("Модель расчитана")
         }
         private void Settings_toolStripButton_Click(object sender, EventArgs e)
         {
@@ -898,10 +822,10 @@ namespace Транспорт2017
         {
             string[] masNameOst;
             МатрицаКорреспонденций МатрицаКорр = InitMatrixCorrespondents(out masNameOst);
-            string errMsg;
-            if (!MakeMatrixCorrespondents(ref МатрицаКорр, SettingsModel.ПоВсемМаршрутам, masNameOst, out errMsg))
-                ;
-            MessageBox.Show(errMsg);//"Расчет матрицы достижимостей закончен"
+
+            string msg;
+            MakeMatrixCorrespondents(ref МатрицаКорр, SettingsModel.ПоВсемМаршрутам, masNameOst, out msg);
+            MessageBox.Show(msg);//"Расчет матрицы достижимостей закончен"
         }
         private void TrafPas_ToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -912,11 +836,10 @@ namespace Транспорт2017
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                string errMsg;
+                string msg;
                 //обработать файл с пассажирами
-                if (!ProcessPassangersGeneration(openFileDialog.FileName, out errMsg))
-                    ;
-                MessageBox.Show(errMsg);//"Обработка файла с пассажирами произведена");
+                ProcessPassangersGeneration(openFileDialog.FileName, out msg);
+                MessageBox.Show(msg);//"Обработка файла с пассажирами произведена");
             }
         }
         private void StructMarsh_ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -928,122 +851,11 @@ namespace Транспорт2017
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                string errMsg;
+                string msg;
                 //обработать файл с пассажирами
-                if (!РасчетВсехМаршрутов(openFileDialog.FileName, SettingsModel.FileNameModel, out errMsg))
-                    ;
-                MessageBox.Show(errMsg);//"Обработка файла с пассажирами произведена");
+                РасчетВсехМаршрутов(openFileDialog.FileName, SettingsModel.FileNameModel, out msg);
+                MessageBox.Show(msg);//"Обработка файла с пассажирами произведена");
             }
-        }
-        //временное  - не используется
-        private void ToolStripButton1_Click(object sender, EventArgs e)//формирование соседних перегонов для ВСЕХ маршрутов
-        {
-            Остановка[] masOst = LoadOst(SettingsModel.FileNameModel);
-            //загрузка маршрутов
-            Маршрут[] masMarsh = LoadMarshrut(SettingsModel.FileNameModel, true);
-            Dictionary<string, Перегон> dict = new Dictionary<string, Перегон>();
-            string str;
-            for (int i = 0; i < masMarsh.Length; i++)
-            {
-                int[] masO = masMarsh[i].КодыОстановок;
-                for (int j = 0; j < masO.Length - 1; j++)
-                {
-                    str = masO[j] + "_" + masO[j + 1];
-                    if (dict.ContainsKey(str))
-                        continue;
-                    str = masO[j + 1] + "_" + masO[j];
-                    if (dict.ContainsKey(str))
-                        continue;
-                    dict[str] = new Перегон
-                    {
-                        codeOst = masO[j],
-                        number = masO[j + 1]
-                    };
-                }
-            }
-            //сохранение списка перегонов в файл
-            FileStream file = new FileStream("все перегоны.xlsx", FileMode.Create);
-            using (ExcelPackage package = new ExcelPackage(file))
-            {
-                ExcelWorksheet wkSheet = package.Workbook.Worksheets.Add("перегоны");
-                int irow = 1;
-                wkSheet.Cells[irow, 1].Value = "код ост от";
-                wkSheet.Cells[irow, 2].Value = "код ост до";
-                wkSheet.Cells[irow, 3].Value = "Название от";
-                wkSheet.Cells[irow, 4].Value = "Название до";
-                irow++;
-                foreach (KeyValuePair<string, Перегон> kvp in dict)
-                {
-                    wkSheet.Cells[irow, 1].Value = kvp.Value.codeOst;
-                    wkSheet.Cells[irow, 2].Value = kvp.Value.number;
-                    wkSheet.Cells[irow, 3].Value = masOst[kvp.Value.codeOst - 1].Название;
-                    wkSheet.Cells[irow, 4].Value = masOst[kvp.Value.number - 1].Название;
-                    irow++;
-                }
-                package.Save();
-            }
-            file.Close();
-            MessageBox.Show("готово");
-        }
-        private Остановка[] LoadOst(string fileNameModel)//формирование списка всех остановок
-        {
-            Остановка[] masOsts;
-            //*** открыть файл modelХХ.xlsm
-            FileInfo file = new FileInfo(fileNameModel);
-            using (ExcelPackage package = new ExcelPackage(file))
-            {
-                ExcelWorksheet wkSheet = package.Workbook.Worksheets["ИД_Остановки"];
-                int КолОстановок = wkSheet.Cells[1, 1].GetValue<int>();
-                masOsts = new Остановка[КолОстановок];
-                int irow;
-                for (int i = 0; i < КолОстановок; i++)
-                {
-                    irow = i + 3;
-                    //создание новой остановки
-                    masOsts[i] = new Остановка(wkSheet.Cells[irow, 1].GetValue<int>(), wkSheet.Cells[irow, 2].Text, 100, null);
-                }
-            }
-            return masOsts;
-        }
-
-        private void ToolStripButton1_Click_1(object sender, EventArgs e)
-        {
-            string errMsg;
-            if (coord.КолМаршрутов == 0) //если не было загрузки из файла
-            {
-                if (!LoadDataToCoordinator(out errMsg))
-                    MessageBox.Show(errMsg, "Ошибка разбора трафика", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                coord.колЧасовРаботы = SettingsModel.КолЧасовМоделирования;
-                Остановка.МАКСВремяОжиданияПасДоУхода = SettingsModel.МаксВремяОжидания;
-                Остановка.ВЕРОЯТНОСТЬПродолженияПоездки = SettingsModel.ВероятностьПродолженияПоездки;
-            }
-            //
-            //string strResult=coord.testTrol();
-            List<ТроллейбусыДляПротокола> listRes = coord.TestTrol();
-            Маршрут[] masTrol = coord.GetUniqeTrollMarsh();
-
-            //
-            //ShowResultDay(strResult);
-            if(!ЗаписьОтчетаТроллейбусыВExcel(listRes, masTrol, out errMsg))
-                MessageBox.Show(errMsg, "Ошибка разбора трафика", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-
-        }
-        public bool ЗаписьОтчетаТроллейбусыВExcel(List<ТроллейбусыДляПротокола> listRes,Маршрут[] masTrol, out string errMsg)
-        {
-            try
-            {
-                if (!ПротоколExcel.ОткрытьФайл(out errMsg))
-                    return false;
-                ПротоколExcel.ДобавитьЛист("троллейбусы");
-                ПротоколExcel.ЗаписатьТроллейбусы(listRes,masTrol);
-                ПротоколExcel.ЗакрытьФайл();
-            }
-            catch (Exception exc)
-            {
-                errMsg = exc.Message;
-                return false;
-            }
-            return true;
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
